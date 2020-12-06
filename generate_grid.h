@@ -9,32 +9,37 @@
 #include <unordered_map>
 using namespace std;
 
+vector<vector<int>> convertTerrainToCostGrid(
+        vector<vector<char>> &terrainMapGrid, unordered_map<char, int> &cellKeyVals);
+
+
+struct costGrid{
+    vector<vector<int>> grid;
+    int rowCount;
+    int colCount;
+    pair<int,int> start;
+    pair<int,int> end;
+};
+struct gridData{
+    unordered_map<int, costGrid> assorted;
+    costGrid specific;
+};
+
+void display_data(pair<int,int> start, pair<int,int> end, vector<vector<int>> cg);
+void display_data(costGrid cg);
+
 class generate_grid{
 private:
     unordered_map<char, int> cellKeyVals;
     vector<vector<char>> terrainMapGrid;
-
-
-    void convertTerrainToCostGrid();
+    gridData gridDat;
+    void input_capture();
 
 public:
-
-    vector<vector<int>> costMapGrid;
-    pair<int,int> startPoint;
-    pair<int,int> endPoint;
-
-    generate_grid(unordered_map<char, int> cellKeyVals, vector<vector<char>> terrainMap);
-    generate_grid();
-    void input_capture();
-    void display_data();
-
+    explicit generate_grid(bool cinCapture);
+    gridData getGridData();
+    static costGrid generateRandomGrid(int amt);
 };
 
 #endif //MOUNTAINPATH_GENERATE_GRID_H
 
-
-//Note: from Main
-//unordered_map<char, int> charValMap;
-//vector<vector<char>> generate_grid(row, vector<char>(col, '0'));
-//
-//int startX, startY, endX, endY;
