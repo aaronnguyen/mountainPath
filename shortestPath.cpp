@@ -22,7 +22,36 @@ void shortPathBellmanFord::BellmanFordAlgorithm(
     unordered_map<string, int> parentCost, value;
     // algo fills value up with INT_MAX, but just use existence as the INT_MAX
 
+    // Need to initialize parent and value;
+    string firstkey = pts(start.first, start.second);
+    parent[firstkey] = pts(0,0); // parent is itself.
+    value[firstkey] = 0;
+
     vector<EDGE> edges;
+
+    auto print_um_str = [](unordered_map<string, string> um, string name){
+        cout << name << "\n=======\n";
+        for(auto u: um){
+            cout << u.first << " " << u.second << "\n";
+        }
+        cout << "====\n";
+    };
+    auto print_um_int = [](unordered_map<string, int> um, string name){
+        cout << name << "\n=======\n";
+        for(auto u: um){
+            cout << u.first << " " << to_string(u.second) << "\n";
+        }
+        cout << "====\n";
+    };
+    auto print_edges = [pts](vector<EDGE> edges){
+        cout << "EDGES\n=======\n";
+        for (auto e: edges){
+            cout << "Source: (" << pts(e.src.first, e.src.second) << ")\n";
+            cout << "Destin: (" << pts(e.dest.first, e.dest.second) << ")\n";
+            cout << "Weight: " << to_string(e.weight) << "\n";
+        }
+    };
+
 
     // set<string> visited;
     //Dont need to keep track of visited. we are already iterating through all nodes once.
@@ -49,6 +78,7 @@ void shortPathBellmanFord::BellmanFordAlgorithm(
                 edges.emplace_back(nEdge);
 
                 edgeCount++;
+                value[pts(nX,nY)] = INT_MAX;
             }
         }
     }
@@ -67,15 +97,8 @@ void shortPathBellmanFord::BellmanFordAlgorithm(
             string srcStrKey = pts(src.first, src.second);
             string destStrKey = pts(dest.first, dest.second);
 
-            bool isInfinity = true;
-            if (value.find(srcStrKey) != value.end()) isInfinity = false;
-
-            bool underWeight = false;
-            if (!isInfinity &&
-                (value.find(srcStrKey)->second + weight) < value.find(destStrKey)->second)
-                underWeight = true;
-
-            if(!isInfinity && underWeight){
+            if(value.find(srcStrKey)->second != INT_MAX &&
+               (value.find(srcStrKey)->second + weight) < value.find(destStrKey)->second){
 //            if (value[src] != INT_MAX && value[src] + weight < value[dest]){
 
 //                v = dest, u = src weight
@@ -89,9 +112,17 @@ void shortPathBellmanFord::BellmanFordAlgorithm(
 //                updated = true;
                 breakAway = false;
             }
+
+            print_um_int(value, "Value");
+            print_um_str(parent, "Parent");
+            print_um_int(parentCost, "ParentCost");
+            cout << "BREAK\n";
         }
 
-        if (breakAway) break;
+        if (breakAway) {
+            cout << "breaking away\n";
+            break;
+        }
     }
 
     //check for negative edge cycles
@@ -132,6 +163,8 @@ void shortPathBellmanFord::BellmanFordAlgorithm(
         cout << pval << " from source equals " << value[pkey] << "\n";
     }
 
+    cout << pts(end.first, end.second) << "\n";
+    cout << value[pts(end.first, end.second)];
 
 }
 
