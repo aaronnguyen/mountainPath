@@ -13,14 +13,15 @@ class generate_grid{
 private:
     unordered_map<char, int> cellKeyVals;
     vector<vector<char>> terrainMapGrid;
-    vector<vector<int>> costMapGrid;
 
-    pair<int,int> startPoint;
-    pair<int,int> endPoint;
 
     void convertTerrainToCostGrid();
 
 public:
+
+    vector<vector<int>> costMapGrid;
+    pair<int,int> startPoint;
+    pair<int,int> endPoint;
 
     generate_grid(unordered_map<char, int> cellKeyVals, vector<vector<char>> terrainMap);
     generate_grid();

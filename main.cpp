@@ -10,7 +10,10 @@ using namespace std;
 int main() {
     generate_grid gg;
 
-    gg.display_data();
+//    gg.display_data();
+
+    shortPathBellmanFord bf;
+    bf.BellmanFordAlgorithm(gg.costMapGrid, gg.startPoint, gg.endPoint);
 
 
    return 0;
