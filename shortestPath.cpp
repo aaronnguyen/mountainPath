@@ -5,166 +5,143 @@
 #include "shortestPath.h"
 #include <bits/stdc++.h> // for INT_MAX
 
+void printShortRoute(shortRoute solution) {
 
-void shortPathBellmanFord::BellmanFordAlgorithm(
-        vector<vector<int>> &costMapGrid,
-        pair<int, int> start, pair<int, int> end){
+    cout << solution.routeCost << "\n";
 
-    // Functor to convert pair of ints into string for key comparisons
-    // pts = pair to string
-    auto pts = [](int xIn, int yIn) -> string{
-        return to_string(xIn) + "," + to_string(yIn);
-    };
+    for (auto s: solution.routeGuidance){
+        cout << s.first << " " << s.second << "\n";
+    }
+}
 
-    // int Vertex and int Edges, Edges = Vertex-1.
-    // using unordered_map, so we will keep track that way.
-    unordered_map<string, string> parent;
-    unordered_map<string, int> parentCost, value;
-    // algo fills value up with INT_MAX, but just use existence as the INT_MAX
+shortRoute bellmanFord::shortPath(vector<vector<int>> &costMapGrid,
+                            pair<int, int> start, pair<int, int> end){
 
-    // Need to initialize parent and value;
-    string firstkey = pts(start.first, start.second);
-    parent[firstkey] = pts(0,0); // parent is itself.
-    value[firstkey] = 0;
+    vector<vector<int>> moveDir = {{0,1},{1,0}};
+//    assuming that start is northWest of end.
 
+//    BFS search through all nodes until we hit the end.
+//    save that traversal into a vector and index of vector will be id of node
+    queue<pair<int,int>> bfs;
+    unordered_map<string, coord> nodeRef;
     vector<EDGE> edges;
+    // used to store the coordinates of nodes, locatable by index number.
 
-    auto print_um_str = [](unordered_map<string, string> um, string name){
-        cout << name << "\n=======\n";
-        for(auto u: um){
-            cout << u.first << " " << u.second << "\n";
-        }
-        cout << "====\n";
+    auto pts = [](int x, int y){
+        return to_string(x) + "," + to_string(y);
     };
-    auto print_um_int = [](unordered_map<string, int> um, string name){
-        cout << name << "\n=======\n";
-        for(auto u: um){
-            cout << u.first << " " << to_string(u.second) << "\n";
-        }
-        cout << "====\n";
-    };
-    auto print_edges = [pts](vector<EDGE> edges){
-        cout << "EDGES\n=======\n";
-        for (auto e: edges){
-            cout << "Source: (" << pts(e.src.first, e.src.second) << ")\n";
-            cout << "Destin: (" << pts(e.dest.first, e.dest.second) << ")\n";
-            cout << "Weight: " << to_string(e.weight) << "\n";
-        }
-    };
+    int nodeIdx = 0;
+    bfs.push(start);
+//    nodeRef.emplace_back(start);
+    coord c;
+    c.x = start.first;
+    c.y = start.second;
+    c.idx = nodeIdx;
+    nodeRef[pts(c.x, c.y)] = c;
 
+    while(!bfs.empty()){
+        pair<int,int> curr = bfs.front();
+        bfs.pop();
+        int cx = curr.first;
+        int cy = curr.second;
+        string currKey = pts(cx, cy);
+        int currIdx = nodeRef.find(currKey)->second.idx;
 
-    // set<string> visited;
-    //Dont need to keep track of visited. we are already iterating through all nodes once.
-    int vertexCount = 0;
-    int edgeCount = 0;
-    // using start and end coordinates to shrink zone down to relevant
-    for (int i = start.first; i < end.first; ++i){
-        for (int j = start.second; j < end.second; ++j){
-            vertexCount++;
+        for (auto m: moveDir){
 
-            int weight = costMapGrid[i][j];
+            int nx = cx+m[0];
+            int ny = cy+m[1];
 
-            // Note: Bellman Ford is directional, so only moving in one direction.
-            // i.e. can't move backwards.
-            vector<vector<int>> moveDir = {{0,1}, {1,0}};
-            for (auto m: moveDir){
-                int nX = i+m[0];
-                int nY = j+m[1];
+            if (nx <= end.first && ny <= end.second){
+                string newKey = pts(nx, ny);
+                if (nodeRef.find(newKey) == nodeRef.end()) {
+                    nodeIdx++;
+                    coord newCoord;
+                    newCoord.x = nx;
+                    newCoord.y = ny;
+                    newCoord.idx = nodeIdx;
 
-                EDGE nEdge;
-                nEdge.src = make_pair(i, j);
-                nEdge.dest = make_pair(nX, nY);
-                nEdge.weight = costMapGrid[nX][nY];
-                edges.emplace_back(nEdge);
+                    nodeRef[newKey] = newCoord;
+                    bfs.push(make_pair(nx, ny));
+                }
 
-                edgeCount++;
-                value[pts(nX,nY)] = INT_MAX;
+                EDGE newEdge;
+                newEdge.src = currIdx;
+                newEdge.dest = nodeRef.find(newKey)->second.idx;
+                newEdge.weight = costMapGrid[nx][ny];
+                edges.emplace_back(newEdge);
             }
         }
     }
 
-    bool breakAway;
-    for(int v = 0; v < vertexCount-1; ++v){
-        breakAway = true;
-        for (int w = 0; w < edgeCount; ++w){
+//    Bellman Ford Path Search
+    int vertexCount = nodeRef.size();
+    int edgeCount = edges.size();
+//    vector<EDGE> edge;
 
-//              int src, int dest, int weight;
-            EDGE curEdg = edges[w];
-            pair<int, int> src = curEdg.src;
-            pair<int, int> dest = curEdg.dest;
-            int weight = curEdg.weight;
+    int parent[vertexCount];
+    vector<int> value(vertexCount, INT_MAX);
 
-            string srcStrKey = pts(src.first, src.second);
-            string destStrKey = pts(dest.first, dest.second);
+    //initialize
+    parent[0] = -1;
+    value[0] = 0;
 
-            if(value.find(srcStrKey)->second != INT_MAX &&
-               (value.find(srcStrKey)->second + weight) < value.find(destStrKey)->second){
-//            if (value[src] != INT_MAX && value[src] + weight < value[dest]){
-
-//                v = dest, u = src weight
-//                value[v] = value[u] + weight;
-                value[destStrKey] = value[srcStrKey] + weight;
-//                parent[v]  = u;
-                parent[destStrKey] = srcStrKey;
-//                cost_par[v] = value[v];
-                parentCost[destStrKey] = value[destStrKey];
-
-//                updated = true;
-                breakAway = false;
+    // control graph flow with bool
+    bool updated;
+    for (int i = 0; i < vertexCount-1; ++i){
+        updated = false;
+        for(int j = 0; j < edgeCount; ++j){
+            int src_j = edges[j].src;
+            int dst_j = edges[j].dest;
+            int wgt_j = value[src_j] + edges[j].weight;
+            if (value[src_j] != INT_MAX && wgt_j < value[dst_j]){
+                value[dst_j] = wgt_j;
+                parent[dst_j] = src_j;
+                updated = true;
             }
-
-            print_um_int(value, "Value");
-            print_um_str(parent, "Parent");
-            print_um_int(parentCost, "ParentCost");
-            cout << "BREAK\n";
         }
-
-        if (breakAway) {
-            cout << "breaking away\n";
-            break;
-        }
+        if (!updated) break;
     }
 
-    //check for negative edge cycles
-    for (int y = 0; y < edgeCount && !breakAway; ++y){
-        EDGE yEdge = edges[y];
+    // check for negative edge cycles
+    for (int i = 0; i < edgeCount && updated; ++i){
+        int src_negCheck = edges[i].src;
+        int dest_negCheck = edges[i].dest;
+        int weight_negCheck = edges[i].weight;
 
-        //    int uu = Edges[ii].src;
-        pair<int,int> ySrc = yEdge.src;
-
-        //    int vv = edges[ii].dest;
-        pair <int, int> yDest = yEdge.dest;
-
-        //    int ww = edges[ii].weight;
-        int yWeight = yEdge.weight;
-
-        string u = pts(yEdge.src.first, yEdge.src.second);
-        string v = pts(yEdge.dest.first, yEdge.dest.second);
-
-        bool isInfinity = false;
-        if (value.find(u) == value.end()) isInfinity = true;
-
-    //    if(value[uu] != INT_MAX && value[uu] + ww < value[vv]) {
-        if(!isInfinity && value[v] + yWeight < value[v]) {
+        if (value[src_negCheck] != INT_MAX && value[src_negCheck] + weight_negCheck < value[dest_negCheck]) {
             cout << "Graph has a negative edge cycle\n";
-            return;
+            return shortRoute();
         }
     }
 
-
-    //print shortest path
-    //for (int ii = 0; ii < vertexCount; ++ii) {
-    for (auto p: parent){
-        string pkey = p.first;
-        string pval = p.second;
-        //    cout << "u->v: " << parent[ii] << "--" << ii << " Cost to reach ";
-        cout << "u->v: " << pval << "--" << pkey << " Cost to reach ";
-        //    cout << parent[ii] << " from source equals " << value[ii] << "\n";
-        cout << pval << " from source equals " << value[pkey] << "\n";
+    // we built a reference, but now format it so we can use it.
+    coord coordByIndex[nodeRef.size()];
+    for (auto n: nodeRef){
+        coord nc = n.second;
+        coordByIndex[nc.idx] = nc;
     }
 
-    cout << pts(end.first, end.second) << "\n";
-    cout << value[pts(end.first, end.second)];
+    // figure out shortest path by working backwards.
+    int optimalPath = vertexCount-1;
+    vector<pair<int,int>> routeGuide;
+//    cout << "Key: src --> dest :: cost\n";
+//    cout << "NOTE: route in reverse\n=====\n";
+    for (int i = vertexCount-1; i >= 0; --i){
+//        cout << parent[i] << " --> " << i << " :: " << value[i] << "\n";
+
+        if (i == optimalPath){
+            routeGuide.emplace_back(make_pair(coordByIndex[i].x, coordByIndex[i].y));
+            optimalPath = parent[i];
+        }
+
+    }
+
+    reverse(routeGuide.begin(), routeGuide.end());
+    shortRoute sr;
+    sr.routeCost = value[vertexCount-1];
+    sr.routeGuidance = routeGuide;
+    return sr;
 
 }
 

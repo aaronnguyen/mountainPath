@@ -14,25 +14,25 @@ struct shortRoute{
     int routeCost;
 };
 
+void printShortRoute(shortRoute solution);
 
-class shortPathBellmanFord{
+class bellmanFord{
 private:
     struct EDGE{
-        pair<int, int> src;
-        pair<int, int> dest;
+        int src;
+        int dest;
         int weight;
     };
-
-    shortRoute solution;
+    struct coord{
+        int x;
+        int y;
+        int idx;
+    };
 
 public:
 
-    void BellmanFordAlgorithm(vector<vector<int>> &costMapGrid,
+    shortRoute shortPath(vector<vector<int>> &costMapGrid,
                               pair<int, int> start, pair<int, int> end);
-
-    shortRoute getSolution() {
-        return solution;
-    }
 
 };
 
