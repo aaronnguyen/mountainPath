@@ -5,61 +5,6 @@
 #include "shortestPath.h"
 #include <bits/stdc++.h> // for INT_MAX
 
-//void shortPathBellmanFord::calculatePath_BellmanFord(
-//        vector<vector<int>> &costMapGrid, pair<int, int> start, pair<int, int> end) {
-//
-////    setupEdgeList(costMapGrid);
-//    BellmanFordAlgorithm(costMapGrid, start, end);
-//
-//}
-
-//void shortPathBellmanFord::setupEdgeList(
-//        vector<vector<int>> &costMapGrid) {
-//
-//    int minRow = 0, minCol = 0;
-//    int maxRow = costMapGrid.size()-1, maxCol = costMapGrid[0].size()-1;
-//    // make the max values aligned with the index values
-//
-//    vector<EDGE> t_edges;
-//
-//    // bfs queue
-//    queue<EDGE> q;
-//
-//    EDGE root;
-//    root.src = make_pair(-1, -1);
-//    root.dest = make_pair(0,0);
-//    root.weight = 0;
-//    //no cost since we are not actually moving through it.
-//
-//    q.push(root);
-//
-//    while(!q.empty()){
-//        EDGE curr = q.front();
-//        q.pop();
-//
-//        auto cs = curr.src;
-//        auto cd = curr.dest;
-//        int cw = curr.weight;
-//
-//        vector<vector<int>> moveDir = { {0,1}, {1,0}, {0,-1}, {-1,0} };
-//        for (auto d: moveDir){
-//            int newX = curr.dest.first+d[0];
-//            int newY = curr.dest.second+d[1];
-//
-//            if (newX >= minRow && newY <= minCol && newX <= maxRow && newY <= maxCol){
-//                EDGE newEdge;
-//                newEdge.src = cd;
-//                newEdge.dest = make_pair(newX, newY);
-//                newEdge.weight = costMapGrid[newX][newY];
-//
-//                q.push(newEdge);
-//                t_edges.emplace_back(newEdge);
-//            }
-//        }
-//    }
-//    edges = t_edges;
-//}
-
 
 void shortPathBellmanFord::BellmanFordAlgorithm(
         vector<vector<int>> &costMapGrid,

@@ -24,16 +24,9 @@ private:
     };
 
     shortRoute solution;
-//    vector<EDGE> edges;
-
-//    void setupEdgeList(vector<vector<int>> &costMapGrid);
 
 public:
-//    shortPathBellmanFord();
 
-//    void calculatePath_BellmanFord(
-//            vector<vector<int>> &costMapGrid,
-//            pair<int,int> start, pair<int,int> end);
     void BellmanFordAlgorithm(vector<vector<int>> &costMapGrid,
                               pair<int, int> start, pair<int, int> end);
 
