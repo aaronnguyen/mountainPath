@@ -17,22 +17,39 @@ void printShortRoute(shortRoute solution) {
 shortRoute bellmanFord::shortPath(vector<vector<int>> &costMapGrid,
                             pair<int, int> start, pair<int, int> end){
 
-    vector<vector<int>> moveDir = {{0,1},{1,0}};
-//    assuming that start is northWest of end.
+    vector<vector<int>> moveDir = {{0,1},{1,0},{0,-1},{-1,0}};
+    
+    // define the boundaries.
+    int minX = 0;
+    int minY = 0;
+    int maxX = costMapGrid.size();
+    int maxY = costMapGrid[0].size();
 
-//    BFS search through all nodes until we hit the end.
-//    save that traversal into a vector and index of vector will be id of node
-    queue<pair<int,int>> bfs;
-    unordered_map<string, coord> nodeRef;
-    vector<EDGE> edges;
-    // used to store the coordinates of nodes, locatable by index number.
-
+    // pair of ints to string. for key ref use.
     auto pts = [](int x, int y){
         return to_string(x) + "," + to_string(y);
     };
-    int nodeIdx = 0;
+
+    auto inBounds = [minX, minY, maxX, maxY](int x, int y) -> bool {
+        return x >= minX && x < maxX && y >= minY && y < maxY;
+    };
+
+    // BFS search through all nodes until we hit the end.
+    // save that traversal into a vector and index of vector will be id of node
+    // since Bellman Ford is only directed graphs, we can outline the possible edges
+    // prior to running the search.
+    queue<pair<int,int>> bfs;
     bfs.push(start);
-//    nodeRef.emplace_back(start);
+
+    int endIdx = -1;
+
+    vector<EDGE> edges;
+    // used to store the coordinates of nodes, locatable by index number.
+
+    // nodeIdx to label the nodes with an int.
+    // doesn't matter what order as long as we can reference it later.
+    int nodeIdx = 0;
+    unordered_map<string, coord> nodeRef;
     coord c;
     c.x = start.first;
     c.y = start.second;
@@ -52,7 +69,8 @@ shortRoute bellmanFord::shortPath(vector<vector<int>> &costMapGrid,
             int nx = cx+m[0];
             int ny = cy+m[1];
 
-            if (nx <= end.first && ny <= end.second){
+            // if (nx <= end.first && ny <= end.second){
+            if (inBounds(nx, ny) ){
                 string newKey = pts(nx, ny);
                 if (nodeRef.find(newKey) == nodeRef.end()) {
                     nodeIdx++;
@@ -61,8 +79,11 @@ shortRoute bellmanFord::shortPath(vector<vector<int>> &costMapGrid,
                     newCoord.y = ny;
                     newCoord.idx = nodeIdx;
 
+                    pair<int,int> newPair = make_pair(nx, ny);
+                    if (newPair == end) endIdx = nodeIdx;
+
                     nodeRef[newKey] = newCoord;
-                    bfs.push(make_pair(nx, ny));
+                    bfs.push(newPair);
                 }
 
                 EDGE newEdge;
@@ -74,15 +95,15 @@ shortRoute bellmanFord::shortPath(vector<vector<int>> &costMapGrid,
         }
     }
 
-//    Bellman Ford Path Search
+    // Bellman Ford Path Search
     int vertexCount = nodeRef.size();
     int edgeCount = edges.size();
-//    vector<EDGE> edge;
+    // private: vector<EDGE> edge;
 
     int parent[vertexCount];
     vector<int> value(vertexCount, INT_MAX);
 
-    //initialize
+    // initialize vars
     parent[0] = -1;
     value[0] = 0;
 
@@ -123,14 +144,17 @@ shortRoute bellmanFord::shortPath(vector<vector<int>> &costMapGrid,
     }
 
     // figure out shortest path by working backwards.
-    int optimalPath = vertexCount-1;
+    int optimalPath = endIdx;
+    int rCost = 0;
     vector<pair<int,int>> routeGuide;
-//    cout << "Key: src --> dest :: cost\n";
-//    cout << "NOTE: route in reverse\n=====\n";
-    for (int i = vertexCount-1; i >= 0; --i){
-//        cout << parent[i] << " --> " << i << " :: " << value[i] << "\n";
+    //cout << "end: " << endIdx << "\n";
+    //cout << "Key: src --> dest :: cost\n";
+    //cout << "NOTE: route in reverse\n=====\n";
+    for (int i = endIdx; i >= 0; --i){
+        //cout << parent[i] << " --> " << i << " :: " << value[i] << "\n";
 
         if (i == optimalPath){
+            rCost += costMapGrid[coordByIndex[i].x][coordByIndex[i].y];
             routeGuide.emplace_back(make_pair(coordByIndex[i].x, coordByIndex[i].y));
             optimalPath = parent[i];
         }
@@ -139,7 +163,7 @@ shortRoute bellmanFord::shortPath(vector<vector<int>> &costMapGrid,
 
     reverse(routeGuide.begin(), routeGuide.end());
     shortRoute sr;
-    sr.routeCost = value[vertexCount-1];
+    sr.routeCost = value[endIdx];
     sr.routeGuidance = routeGuide;
     return sr;
 
