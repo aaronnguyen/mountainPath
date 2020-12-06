@@ -69,8 +69,7 @@ shortRoute bellmanFord::shortPath(vector<vector<int>> &costMapGrid,
             int nx = cx+m[0];
             int ny = cy+m[1];
 
-            // if (nx <= end.first && ny <= end.second){
-            if (inBounds(nx, ny) ){
+            if (inBounds(nx, ny)){
                 string newKey = pts(nx, ny);
                 if (nodeRef.find(newKey) == nodeRef.end()) {
                     nodeIdx++;
@@ -144,22 +143,12 @@ shortRoute bellmanFord::shortPath(vector<vector<int>> &costMapGrid,
     }
 
     // figure out shortest path by working backwards.
-    int optimalPath = endIdx;
-    int rCost = 0;
+    int i = endIdx;
     vector<pair<int,int>> routeGuide;
-    //cout << "end: " << endIdx << "\n";
-    //cout << "Key: src --> dest :: cost\n";
-    //cout << "NOTE: route in reverse\n=====\n";
-    for (int i = endIdx; i >= 0; --i){
-        //cout << parent[i] << " --> " << i << " :: " << value[i] << "\n";
-
-        if (i == optimalPath){
-            rCost += costMapGrid[coordByIndex[i].x][coordByIndex[i].y];
-            routeGuide.emplace_back(make_pair(coordByIndex[i].x, coordByIndex[i].y));
-            optimalPath = parent[i];
-        }
-
-    }
+    do {
+        routeGuide.emplace_back(make_pair(coordByIndex[i].x, coordByIndex[i].y));
+        i = parent[i];
+    } while(i != -1);
 
     reverse(routeGuide.begin(), routeGuide.end());
     shortRoute sr;
