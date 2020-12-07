@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <unordered_map>
+#include <string>
 using namespace std;
 
 struct shortRoute{
@@ -16,31 +17,48 @@ struct shortRoute{
 
 void printShortRoute(shortRoute solution);
 
+struct EDGE{
+    int srcIdx;
+    int destIdx;
+    int weight;
+};
+struct COOR{
+    int x;
+    int y;
+    int idx;
+};
+
 class bellmanFord{
-private:
-    struct EDGE{
-        int src;
-        int dest;
-        int weight;
-    };
-    struct coord{
-        int x;
-        int y;
-        int idx;
-    };
+//private:
+
 
 public:
 
     shortRoute shortPath(vector<vector<int>> &costMapGrid,
-                              pair<int, int> start, pair<int, int> end);
+                         pair<int, int> &start, pair<int, int> &end);
 
 };
 
-//
-//shortRoute calcRoute_dijkstra(
-//        vector<vector<int>> &costMapGrid,
-//        pair<int,int> start, pair<int,int> end
-//);
+class dijkstra{
+private:
+
+
+public:
+    shortRoute shortPath(vector<vector<int>> &costMapGrid,
+                         pair<int,int> &start, pair<int,int> &end);
+};
+
+
+struct edgeNodeData{
+    vector<EDGE> edges;
+    unordered_map<int, vector<EDGE>> adj;
+    unordered_map<string, COOR> nodeRef;
+};
+
+edgeNodeData travelEdgesBFS();
+
+
+
 //
 //shortRoute calcRoute_primm(
 //        vector<vector<int>> &costMapGrid,

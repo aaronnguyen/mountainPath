@@ -15,10 +15,10 @@ void printShortRoute(shortRoute solution) {
 }
 
 shortRoute bellmanFord::shortPath(vector<vector<int>> &costMapGrid,
-                            pair<int, int> start, pair<int, int> end){
+                                  pair<int, int> &start, pair<int, int> &end){
 
     vector<vector<int>> moveDir = {{0,1},{1,0},{0,-1},{-1,0}};
-    
+
     // define the boundaries.
     int minX = 0;
     int minY = 0;
@@ -49,8 +49,8 @@ shortRoute bellmanFord::shortPath(vector<vector<int>> &costMapGrid,
     // nodeIdx to label the nodes with an int.
     // doesn't matter what order as long as we can reference it later.
     int nodeIdx = 0;
-    unordered_map<string, coord> nodeRef;
-    coord c;
+    unordered_map<string, COOR> nodeRef;
+    COOR c;
     c.x = start.first;
     c.y = start.second;
     c.idx = nodeIdx;
@@ -73,7 +73,7 @@ shortRoute bellmanFord::shortPath(vector<vector<int>> &costMapGrid,
                 string newKey = pts(nx, ny);
                 if (nodeRef.find(newKey) == nodeRef.end()) {
                     nodeIdx++;
-                    coord newCoord;
+                    COOR newCoord;
                     newCoord.x = nx;
                     newCoord.y = ny;
                     newCoord.idx = nodeIdx;
@@ -86,8 +86,8 @@ shortRoute bellmanFord::shortPath(vector<vector<int>> &costMapGrid,
                 }
 
                 EDGE newEdge;
-                newEdge.src = currIdx;
-                newEdge.dest = nodeRef.find(newKey)->second.idx;
+                newEdge.srcIdx = currIdx;
+                newEdge.destIdx = nodeRef.find(newKey)->second.idx;
                 newEdge.weight = costMapGrid[nx][ny];
                 edges.emplace_back(newEdge);
             }
@@ -111,8 +111,8 @@ shortRoute bellmanFord::shortPath(vector<vector<int>> &costMapGrid,
     for (int i = 0; i < vertexCount-1; ++i){
         updated = false;
         for(int j = 0; j < edgeCount; ++j){
-            int src_j = edges[j].src;
-            int dst_j = edges[j].dest;
+            int src_j = edges[j].srcIdx;
+            int dst_j = edges[j].destIdx;
             int wgt_j = value[src_j] + edges[j].weight;
             if (value[src_j] != INT_MAX && wgt_j < value[dst_j]){
                 value[dst_j] = wgt_j;
@@ -125,8 +125,8 @@ shortRoute bellmanFord::shortPath(vector<vector<int>> &costMapGrid,
 
     // check for negative edge cycles
     for (int i = 0; i < edgeCount && updated; ++i){
-        int src_negCheck = edges[i].src;
-        int dest_negCheck = edges[i].dest;
+        int src_negCheck = edges[i].srcIdx;
+        int dest_negCheck = edges[i].destIdx;
         int weight_negCheck = edges[i].weight;
 
         if (value[src_negCheck] != INT_MAX && value[src_negCheck] + weight_negCheck < value[dest_negCheck]) {
@@ -136,9 +136,9 @@ shortRoute bellmanFord::shortPath(vector<vector<int>> &costMapGrid,
     }
 
     // we built a reference, but now format it so we can use it.
-    coord coordByIndex[nodeRef.size()];
+    COOR coordByIndex[nodeRef.size()];
     for (auto n: nodeRef){
-        coord nc = n.second;
+        COOR nc = n.second;
         coordByIndex[nc.idx] = nc;
     }
 
@@ -158,3 +158,171 @@ shortRoute bellmanFord::shortPath(vector<vector<int>> &costMapGrid,
 
 }
 
+
+edgeNodeData travelEdgesBFS(vector<vector<int>> &costMapGrid,
+                            pair<int, int> &start, pair<int, int> &end,
+                            vector<int> border){
+
+    vector<vector<int>> moveDir = {{0,1},{1,0},{0,-1},{-1,0}};
+
+    // define the boundaries.
+    int minX = border[0];
+    int minY = border[1];
+    int maxX = border[2];
+    int maxY = border[3];
+
+    // pair of ints to string. for key ref use.
+    auto pts = [](int x, int y){
+        return to_string(x) + "," + to_string(y);
+    };
+
+    auto inBounds = [minX, minY, maxX, maxY](int x, int y) -> bool {
+        return x >= minX && x < maxX && y >= minY && y < maxY;
+    };
+
+    // BFS search through all nodes until we hit the end.
+    // save that traversal into a vector and index of vector will be id of node
+    // since Bellman Ford is only directed graphs, we can outline the possible edges
+    // prior to running the search.
+    queue<pair<int,int>> bfs;
+    bfs.push(start);
+
+    int endIdx = -1;
+
+    vector<EDGE> edges;
+    // used to store the coordinates of nodes, locatable by index number.
+
+    // specific to Dijkstras
+    unordered_map<int, vector<EDGE>> adj;
+    // int should be the index of src node.
+    // pair<int, int> == {weight, neighborVertexID}
+    // edge contains all the data. just make it searchable by int.
+
+    // nodeIdx to label the nodes with an int.
+    // doesn't matter what order as long as we can reference it later.
+    int nodeIdx = 0;
+    unordered_map<string, COOR> nodeRef;
+
+
+
+
+    COOR c;
+    c.x = start.first;
+    c.y = start.second;
+    c.idx = nodeIdx;
+    nodeRef[pts(c.x, c.y)] = c;
+
+    while(!bfs.empty()){
+        pair<int,int> curr = bfs.front();
+        bfs.pop();
+        int cx = curr.first;
+        int cy = curr.second;
+        string currKey = pts(cx, cy);
+        int currIdx = nodeRef.find(currKey)->second.idx;
+
+        for (auto m: moveDir){
+
+            int nx = cx+m[0];
+            int ny = cy+m[1];
+
+            if (inBounds(nx, ny)){
+                string newKey = pts(nx, ny);
+                if (nodeRef.find(newKey) == nodeRef.end()) {
+                    nodeIdx++;
+                    COOR newCoord;
+                    newCoord.x = nx;
+                    newCoord.y = ny;
+                    newCoord.idx = nodeIdx;
+
+                    pair<int,int> newPair = make_pair(nx, ny);
+                    if (newPair == end) endIdx = nodeIdx;
+
+                    nodeRef[newKey] = newCoord;
+                    bfs.push(newPair);
+                }
+
+                EDGE newEdge;
+                newEdge.srcIdx = currIdx;
+                newEdge.destIdx = nodeRef.find(newKey)->second.idx;
+                newEdge.weight = costMapGrid[nx][ny];
+
+                edges.emplace_back(newEdge);
+
+                adj[currIdx].emplace_back(newEdge);
+
+            }
+        }
+    }
+
+    edgeNodeData edd;
+
+    edd.edges = edges;
+    edd.nodeRef = nodeRef;
+    edd.adj = adj;
+
+    return edd;
+
+}
+
+shortRoute dijkstra::shortPath(vector<vector<int>> &costMapGrid,
+                               pair<int, int> &start, pair<int, int> &end) {
+
+    int maxX = costMapGrid.size();
+    int maxY = costMapGrid[0].size();
+    edgeNodeData edd = travelEdgesBFS(
+            costMapGrid, start, end,
+            {0,0,maxX, maxY});
+
+    unordered_map<int, vector<EDGE>> adj;
+//    unordered_map<int, pair<int,int>> adj;
+    // pair<int, int> == {weight, neighborVertexID}
+    priority_queue<pair<int, int>> pq;
+
+    int vv; //vertextAmount
+    bool processed[vv]; //visited
+
+
+
+    int source = 0; // index to denote name of node.
+    int acc_dist[vv];
+    for (int i = 0; i < vv; ++i){
+        acc_dist[i] = INT_MAX;
+    }
+
+    acc_dist[source] = 0;
+    pq.push({0, source});
+
+    while(!pq.empty()){
+        pair<int, int> pqNode = pq.top();
+        int u = pqNode.second; // vertext of interest
+        pq.pop();
+        if(!processed[u]){
+            for (auto neighbor: adj[u]){ //adj is an adjacency list; unordered_map
+
+//                int v = neighbor.second;
+//                int w = neighbor.first; // node v could be first, my choice
+
+                // u = src, v == dest, w = weight
+                int v = neighbor.destIdx;
+                int w = neighbor.weight;
+
+
+                if(acc_dist[u] + w < acc_dist[v]) {
+                    acc_dist[v] = acc_dist[u] + w;
+                    pq.push({-acc_dist[v], v});
+                    // using negative to denote that we are locking in the value.
+                }
+            }
+        }
+    }
+
+
+
+
+
+
+
+
+
+    return shortRoute();
+}
