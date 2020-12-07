@@ -33,7 +33,7 @@ int main() {
         }
         dataGrid = gridSearch->second;
     }
-    else if (mode == "hardcoded"){
+    else if (mode == "hardcode"){
 
         unordered_map<char, int> cellKeyVals;
         cellKeyVals['f'] = 3;
@@ -56,7 +56,7 @@ int main() {
                  {'G', 'g', 'r', 'g', 'g', 'r', 'h', 'm', 'm', 'r'}};
 
         dataGrid.start = make_pair(0, 0);
-        dataGrid.end = make_pair(7, 6);
+        dataGrid.end = make_pair(3, 3);
 
         dataGrid.grid = convertTerrainToCostGrid(terrainMapGrid, cellKeyVals);
 
@@ -65,8 +65,11 @@ int main() {
 
     display_data(dataGrid);
     cout << "\n\n";
-    bellmanFord bf;
-    shortRoute sr = bf.shortPath(dataGrid.grid, dataGrid.start, dataGrid.end);
+
+//    bellmanFord searchAlgo;
+    dijkstra searchAlgo;
+
+    shortRoute sr = searchAlgo.shortPath(dataGrid.grid, dataGrid.start, dataGrid.end);
 
     printShortRoute(sr);
 

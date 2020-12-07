@@ -53,6 +53,8 @@ struct edgeNodeData{
     vector<EDGE> edges;
     unordered_map<int, vector<EDGE>> adj;
     unordered_map<string, COOR> nodeRef;
+    int endIndex;
+    unordered_map<int, COOR> nodRef_intIndex;
 };
 
 edgeNodeData travelEdgesBFS();
