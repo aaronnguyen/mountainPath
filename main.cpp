@@ -2,7 +2,9 @@
 #include <unordered_map>
 #include <vector>
 #include "generate_grid.h"
-#include "shortestPath.h"
+//#include "shortestPath.h"
+#include "dijkstra.h"
+
 
 using namespace std;
 
@@ -44,16 +46,10 @@ int main() {
         cellKeyVals['r'] = 5;
 
         vector<vector<char>> terrainMapGrid =
-                {{'G', 'r', 'g', 'g', 'm', 'm', 'm', 'r', 'f', 'm'},
-                 {'G', 'g', 'r', 'G', 'G', 'G', 'G', 'm', 'f', 'h'},
-                 {'m', 'r', 'f', 'm', 'm', 'f', 'G', 'r', 'h', 'h'},
-                 {'G', 'm', 'G', 'f', 'h', 'r', 'g', 'm', 'g', 'g'},
-                 {'g', 'g', 'g', 'm', 'h', 'm', 'h', 'f', 'm', 'f'},
-                 {'h', 'r', 'g', 'f', 'f', 'f', 'g', 'h', 'r', 'h'},
-                 {'m', 'G', 'f', 'r', 'm', 'm', 'G', 'r', 'g', 'f'},
-                 {'m', 'r', 'h', 'h', 'h', 'h', 'G', 'm', 'm', 'r'},
-                 {'r', 'r', 'g', 'f', 'G', 'r', 'r', 'm', 'f', 'r'},
-                 {'G', 'g', 'r', 'g', 'g', 'r', 'h', 'm', 'm', 'r'}};
+                {{'G', 'r', 'g', 'g'},
+                 {'G', 'g', 'r', 'G'},
+                 {'m', 'r', 'f', 'm'},
+                 {'G', 'g', 'r', 'g'}};
 
         dataGrid.start = make_pair(0, 0);
         dataGrid.end = make_pair(3, 3);

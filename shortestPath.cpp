@@ -2,6 +2,8 @@
 // Created by aaronnguyen on 12/3/20.
 //
 
+// NOTE TO SELF: cost is leaving the node, not the cost of entering the node.
+
 #include "shortestPath.h"
 #include <bits/stdc++.h> // for INT_MAX
 
@@ -159,9 +161,9 @@ shortRoute bellmanFord::shortPath(vector<vector<int>> &costMapGrid,
 }
 
 
-edgeNodeData travelEdgesBFS(vector<vector<int>> &costMapGrid,
-                            pair<int, int> &start, pair<int, int> &end,
-                            vector<int> border){
+edgeNodeData generateEdgeList(vector<vector<int>> &costMapGrid,
+                              pair<int, int> &start, pair<int, int> &end,
+                              vector<int> border){
 
     vector<vector<int>> moveDir = {{0,1},{1,0},{0,-1},{-1,0}};
 
