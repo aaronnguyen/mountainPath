@@ -96,9 +96,10 @@ costGrid generate_grid::generateRandomGrid(int amt) {
 
 
     uniform_int_distribution coordDist(0, amt-1);
-    tempCG.start = make_pair(coordDist(mt), coordDist(mt));
-    tempCG.end = make_pair(coordDist(mt), coordDist(mt));
-
+//    tempCG.start = make_pair(coordDist(mt), coordDist(mt));
+//    tempCG.end = make_pair(coordDist(mt), coordDist(mt));
+    tempCG.start = make_pair(0,0);
+    tempCG.end = make_pair(amt-1, amt-1);
     return tempCG;
 }
 
