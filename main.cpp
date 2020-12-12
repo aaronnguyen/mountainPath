@@ -4,6 +4,8 @@
 #include "generate_grid.h"
 //#include "shortestPath.h"
 #include "dijkstra.h"
+#include <chrono>
+#include <algorithm>
 
 
 using namespace std;
@@ -14,8 +16,26 @@ int main() {
 //    mode = "cin";
 //    mode = "hardcode";
     mode = "assorted";
-
     costGrid dataGrid;
+
+    auto runFromAssorted = [](unordered_map<int, costGrid> &gd_assorted, int amtKey) -> int {
+        dijkstra searchAlgo;
+
+        cout << "=== Starting " << amtKey << " ===\n";
+        auto gridSearch = gd_assorted.find(amtKey);
+        if(gridSearch == gd_assorted.end()) {
+            cout << "No Grid found at key: " << amtKey << "\n";
+            return -1;
+        }
+        costGrid dataGrid = gridSearch->second;
+        shortRoute sr = searchAlgo.shortPath(
+                dataGrid.grid, dataGrid.start, dataGrid.end);
+        printShortRoute(sr);
+
+        cout << "\n=== Completed " << amtKey << " ===\n";
+
+        return 0;
+    };
 
     if (mode == "cin"){
         generate_grid gg(true);
@@ -32,19 +52,25 @@ int main() {
 
         unordered_map<int, costGrid> gd_assorted = gd.assorted;
 
-        dijkstra searchAlgo;
+        vector<int> amtKeys = {10, 20, 50, 200, 500, 1000};
+        vector<int> timeTaken;
+        for (int ak: amtKeys){
+            auto start = std::chrono::high_resolution_clock::now();
+            
+            int status = runFromAssorted(gd_assorted, ak);
+            if (status < 0) return status;
 
-        for (int amtKey: {10, 20, 50, 200, 500, 1000}){
-            auto gridSearch = gd_assorted.find(amtKey);
-            if(gridSearch == gd_assorted.end()) {
-                cout << "No Grid found at key: " << amtKey << "\n";
-                return -1;
-            }
-            dataGrid = gridSearch->second;
-            shortRoute sr = searchAlgo.shortPath(
-                    dataGrid.grid, dataGrid.start, dataGrid.end);
-            printShortRoute(sr);
+            auto stop = std:: chrono::high_resolution_clock::now();
+            auto duration = duration_cast<std::chrono::microseconds>(stop-start);
+            timeTaken.emplace_back(duration.count());
+
         }
+
+        for (int i = 0; i < timeTaken.size(); ++i){
+            cout << "Time (" << amtKeys[i] << " items) :: " << timeTaken[i] << " ms\n";
+        }
+
+
     }
 
     else if (mode == "hardcode"){

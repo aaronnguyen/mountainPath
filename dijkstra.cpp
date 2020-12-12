@@ -67,27 +67,12 @@ shortRoute dijkstra::shortPath(
 
 
     typedef pair<int, int> pairInt;
+    priority_queue<pairInt, vector<pairInt>, greater<pairInt> > pq;
 
-        // Find the lowest index based on cost value. return first instance.
+    // Find the lowest index based on cost value. return first instance.
     // TODO: convert this portion to priority queue searching
     auto getNextIndex = [](vector<bool> &deadEnd, vector<int> &dCost) -> int {
 
-//        for (int i = 0; i < deadEnd.size(); ++i){
-//            bool b = deadEnd[i];
-//            cout << i << ":";
-//            if (b) cout << "T";
-//            else cout << "F";
-//            cout << ", ";
-//        }
-//        cout << endl;
-//
-//        for (int i = 0; i < dCost.size(); ++i){
-//
-//            string outstring = "I";
-//            if (dCost[i]  != INT_MAX) outstring = to_string(dCost[i]);
-//            cout << i << ":" << outstring << ", ";
-//        }
-//        cout << endl;
 
         priority_queue<pairInt, vector<pairInt>, greater<pairInt> > pq;
         for (int i = 0; i < dCost.size(); ++i){
@@ -96,9 +81,29 @@ shortRoute dijkstra::shortPath(
                 // push in dCost first, then the index. then min heap based on dCost value.
             }
         }
-//        string wait; cin >> wait;
 
         return pq.top().second;
+    };
+
+    auto printDijkstraMemory = [](vector<bool> &deadEnd, vector<int> &dCost){
+        for (int i = 0; i < deadEnd.size(); ++i){
+            bool b = deadEnd[i];
+            cout << i << ":";
+            if (b) cout << "T";
+            else cout << "F";
+            cout << ", ";
+        }
+        cout << endl;
+
+        for (int i = 0; i < dCost.size(); ++i){
+
+            string outstring = "I";
+            if (dCost[i]  != INT_MAX) outstring = to_string(dCost[i]);
+            cout << i << ":" << outstring << ", ";
+        }
+        cout << endl;
+        string w;
+        cin >> w;
     };
 
 
@@ -107,7 +112,7 @@ shortRoute dijkstra::shortPath(
     while (coordKey != endKey){
 
         deadEnd[currIdx] = true;
-        int currCost = dCost[currIdx] + costMapGrid[currX][currY];
+        int newCost = dCost[currIdx] + costMapGrid[currX][currY];
 
         for (auto m: moveDir){
             int newX = currX+m[0], newY = currY+m[1];
@@ -121,15 +126,29 @@ shortRoute dijkstra::shortPath(
                     indexToCoordMap[newIdx] = newCoordKey;
                 }
 
-                if (currCost < dCost[newIdx]){
-                    dCost[newIdx] = currCost;
+                if (newCost < dCost[newIdx]){
+                    dCost[newIdx] = newCost;
                     fromIndex[newIdx] = currIdx;
+                    pq.push(make_pair(newCost, newIdx));
                 }
             }
         }
 
         // get the next index (lowest value) and place it into currIdx
-        currIdx = getNextIndex(deadEnd, dCost);
+//        currIdx = getNextIndex(deadEnd, dCost);
+        pair<int,int> currNode = pq.top();
+//        cout << "first: " << currNode.first << "\nsecond: " << currNode.second << endl;
+        pq.pop();
+        currIdx = currNode.second;
+//        printDijkstraMemory(deadEnd, dCost);
+//        auto piPrint = [](priority_queue<pairInt, vector<pairInt>, greater<pairInt> > pqCopy){
+//            while (!pqCopy.empty()){
+//                pair<int,int> pdat = pqCopy.top();
+//                cout << "[PQ] idx: " << pdat.second << " || val: " << pdat.first << endl;
+//                pqCopy.pop();
+//            }
+//        };
+//        piPrint(pq);
 
         // set coordKey to the next index.
         coordKey = getCoord(indexToCoordMap, currIdx);
