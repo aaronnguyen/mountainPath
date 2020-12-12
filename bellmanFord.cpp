@@ -4,7 +4,7 @@
 
 // NOTE TO SELF: cost is leaving the node, not the cost of entering the node.
 
-#include "shortestPath.h"
+#include "bellmanFord.h"
 #include <bits/stdc++.h> // for INT_MAX
 
 void printShortRoute(shortRoute solution) {
@@ -18,8 +18,6 @@ void printShortRoute(shortRoute solution) {
 
 shortRoute bellmanFord::shortPath(vector<vector<int>> &costMapGrid,
                                   pair<int, int> &start, pair<int, int> &end){
-
-    vector<vector<int>> moveDir = {{0,1},{1,0},{0,-1},{-1,0}};
 
     // define the boundaries.
     int minX = 0;
@@ -161,7 +159,7 @@ shortRoute bellmanFord::shortPath(vector<vector<int>> &costMapGrid,
 }
 
 
-edgeNodeData generateEdgeList(vector<vector<int>> &costMapGrid,
+edgeNodeData bellmanFord::generateEdgeList(vector<vector<int>> &costMapGrid,
                               pair<int, int> &start, pair<int, int> &end,
                               vector<int> border){
 
@@ -268,88 +266,4 @@ edgeNodeData generateEdgeList(vector<vector<int>> &costMapGrid,
 
     return edd;
 
-}
-
-shortRoute dijkstra::shortPath(vector<vector<int>> &costMapGrid,
-                               pair<int, int> &start, pair<int, int> &end) {
-
-    int maxX = costMapGrid.size();
-    int maxY = costMapGrid[0].size();
-    edgeNodeData edd = travelEdgesBFS(
-            costMapGrid, start, end,
-            {0,0,maxX, maxY});
-
-    int pingcnt = 0;
-    auto ping = [&pingcnt](){
-        cout << "Ping (" << pingcnt << ")...\n";
-        pingcnt++;
-    };
-
-    unordered_map<int, vector<EDGE>> adjacency = edd.adj;
-//    unordered_map<int, pair<int,int>> adjacency;
-    // pair<int, int> == {weight, neighborVertexID}
-    priority_queue<pair<int, int>> pq;
-
-    int vertextAmount; //vertextAmount
-    bool processed[vertextAmount]; //visited
-
-    int source = 0; // index to denote name of node.
-    int accruedDist[vertextAmount];
-    int fromParent[vertextAmount];
-    for (int i = 0; i < vertextAmount; ++i){
-        accruedDist[i] = INT_MAX;
-        fromParent[i] = -1;
-        processed[i] = false;
-    }
-
-    accruedDist[source] = 0;
-    pq.push({0, source});
-
-    while(!pq.empty()){
-
-        pair<int, int> pqNode = pq.top();
-        int srcIdx = pqNode.second; // vertext of interest, srcIdx
-        pq.pop();
-
-        cout << "EndIndex: " << edd.endIndex << "\n";
-        cout << "Source: " << srcIdx << "\n";
-        if(!processed[srcIdx] && srcIdx != edd.endIndex){
-
-            cout << "nSIZE: " << adjacency[srcIdx].size() << "\n";
-            for (auto neighbor: adjacency[srcIdx]){ //adjacency is an adjacency list; unordered_map
-                ping();
-                // srcIdx = src, destIdx == dest, destWeight = weight
-                int destIdx = neighbor.destIdx; // node destIdx could be first, my choice
-                int destWeight = neighbor.weight;
-
-                cout << srcIdx << "," << destIdx << "\n";
-                cout << accruedDist[srcIdx] + destWeight << " <? " << accruedDist[destIdx] << "\n";
-                if(accruedDist[srcIdx] + destWeight < accruedDist[destIdx]) {
-                    accruedDist[destIdx] = accruedDist[srcIdx] + destWeight;
-                    pq.push({accruedDist[destIdx], destIdx});
-                    fromParent[destIdx] = srcIdx;
-                }
-            }
-            processed[srcIdx] = true;
-        }
-    }
-
-
-//    Convert data into to shortRoute obj;
-    shortRoute sr;
-
-    vector<pair<int,int>> route;
-    int seekIdx = edd.endIndex;
-    do {
-        cout << seekIdx << "<--" << fromParent[seekIdx] << "\n";
-//        COOR n = edd.nodRef_intIndex[seekIdx];
-//        route.emplace_back(make_pair(n.x, n.y));
-        seekIdx = fromParent[seekIdx];
-
-    } while (seekIdx > 0);
-//    reverse(route.begin(), route.end());
-//
-    sr.routeCost = accruedDist[edd.endIndex];
-    sr.routeGuidance = route;
-    return sr;
 }
