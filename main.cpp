@@ -1,11 +1,15 @@
 #include <iostream>
 #include <unordered_map>
 #include <vector>
-#include "generate_grid.h"
-//#include "shortestPath.h"
-#include "dijkstra.h"
 #include <chrono>
 #include <algorithm>
+
+#include "generate_grid.h"
+//#include "bellmanFord.h"
+#include "dijkstra.h"
+//#include "primm.h"
+//#include "kruskal.h"
+//#include "astar.h"
 
 
 using namespace std;
@@ -14,12 +18,27 @@ int main() {
 
     string mode;
 //    mode = "cin";
-//    mode = "hardcode";
-    mode = "assorted";
+    mode = "hardcode";
+//    mode = "assorted";
+    string algorithm;
+    algorithm = "dijkstra";
     costGrid dataGrid;
 
-    auto runFromAssorted = [](unordered_map<int, costGrid> &gd_assorted, int amtKey) -> int {
-        dijkstra searchAlgo;
+    auto runAlgorithm = [](costGrid dataGrid, string algorithm) -> shortRoute {
+
+
+        if (algorithm == "dijkstra"){
+            return dijkstraShortPath(dataGrid.grid, dataGrid.start, dataGrid.end);
+        }
+        else if (algorithm == "bellmanford"){
+
+        }
+
+        return shortRoute();
+    };
+
+
+    auto runFromAssorted = [&runAlgorithm, algorithm](unordered_map<int, costGrid> &gd_assorted, int amtKey) -> int {
 
         cout << "=== Starting " << amtKey << " ===\n";
         auto gridSearch = gd_assorted.find(amtKey);
@@ -28,8 +47,10 @@ int main() {
             return -1;
         }
         costGrid dataGrid = gridSearch->second;
-        shortRoute sr = searchAlgo.shortPath(
-                dataGrid.grid, dataGrid.start, dataGrid.end);
+//        shortRoute sr = dijkstraShortPath(
+//                dataGrid.grid, dataGrid.start, dataGrid.end);
+        shortRoute sr = runAlgorithm(dataGrid, algorithm);
+
         printShortRoute(sr);
 
         cout << "\n=== Completed " << amtKey << " ===\n";
@@ -41,8 +62,9 @@ int main() {
         generate_grid gg(true);
         dataGrid = gg.getGridData().specific;
 
-        dijkstra searchAlgo;
-        shortRoute sr = searchAlgo.shortPath(dataGrid.grid, dataGrid.start, dataGrid.end);
+//        shortRoute sr = dijkstraShortPath(dataGrid.grid, dataGrid.start, dataGrid.end);
+        shortRoute sr = runAlgorithm(dataGrid, algorithm);
+
         printShortRoute(sr);
     }
 
@@ -70,7 +92,6 @@ int main() {
             cout << "Time (" << amtKeys[i] << " items) :: " << timeTaken[i] << " ms\n";
         }
 
-
     }
 
     else if (mode == "hardcode"){
@@ -84,13 +105,19 @@ int main() {
         cellKeyVals['r'] = 5;
 
         vector<vector<char>> terrainMapGrid =
-                {{'G', 'r', 'g', 'g'},
-                 {'G', 'g', 'r', 'G'},
-                 {'m', 'r', 'f', 'm'},
-                 {'G', 'g', 'r', 'g'}};
+                {{'G', 'r', 'g', 'g', 'm', 'm', 'm', 'r', 'f', 'm'},
+                 {'G', 'g', 'r', 'G', 'G', 'G', 'G', 'm', 'f', 'h'},
+                 {'m', 'r', 'f', 'm', 'm', 'f', 'G', 'r', 'h', 'h'},
+                 {'G', 'm', 'G', 'f', 'h', 'r', 'g', 'm', 'g', 'g'},
+                 {'g', 'g', 'g', 'm', 'h', 'm', 'h', 'f', 'm', 'f'},
+                 {'h', 'r', 'g', 'f', 'f', 'f', 'g', 'h', 'r', 'h'},
+                 {'m', 'G', 'f', 'r', 'm', 'm', 'G', 'r', 'g', 'f'},
+                 {'m', 'r', 'h', 'h', 'h', 'h', 'G', 'm', 'm', 'r'},
+                 {'r', 'r', 'g', 'f', 'G', 'r', 'r', 'm', 'f', 'r'},
+                 {'G', 'g', 'r', 'g', 'g', 'r', 'h', 'm', 'm', 'r'}};
 
         dataGrid.start = make_pair(0, 0);
-        dataGrid.end = make_pair(3, 3);
+        dataGrid.end = make_pair(9, 9);
         dataGrid.grid = convertTerrainToCostGrid(terrainMapGrid, cellKeyVals);
         dataGrid.rowCount = terrainMapGrid.size();
         dataGrid.colCount = terrainMapGrid[0].size();
@@ -98,21 +125,15 @@ int main() {
         display_data(dataGrid);
         cout << "\n";
 
-//    bellmanFord searchAlgo;
-        dijkstra searchAlgo;
-
-        shortRoute sr = searchAlgo.shortPath(dataGrid.grid, dataGrid.start, dataGrid.end);
+//        shortRoute sr = dijkstraShortPath(dataGrid.grid, dataGrid.start, dataGrid.end);
+        shortRoute sr = runAlgorithm(dataGrid, algorithm);
         printShortRoute(sr);
-
 
     }
     else {
         string errorString = "Mode does not exist: " + mode;
         throw invalid_argument(errorString);
-        return -1;
     }
-
-
 
     return 0;
 }

@@ -3,16 +3,10 @@
 //
 
 
-#include <vector>
-#include <unordered_map>
-#include <string>
-#include <iostream>
-#include <vector>
-#include "dijkstra.h"
-#include <bits/stdc++.h> // for INT_MAX
-#include <sstream>
-using namespace std;
 
+#include "dijkstra.h"
+
+using namespace std;
 
 void printShortRoute(shortRoute solution) {
 
@@ -24,7 +18,7 @@ void printShortRoute(shortRoute solution) {
 }
 
 
-shortRoute dijkstra::shortPath(
+shortRoute dijkstraShortPath(
         vector<vector<int>> &costMapGrid, pair<int, int> &start, pair<int, int> &end) {
 
     int maxRow = costMapGrid.size();
@@ -54,59 +48,33 @@ shortRoute dijkstra::shortPath(
         else return im->second;
     };
 
+    auto stringToPair = [](string s) -> pair<int,int> {
+        stringstream ss(s);
+        pair<int, int> r;
+        ss >> r.first;
+        ss >> r.second;
+        return r;
+    };
+
+    auto getIndex = [](unordered_map<string, int> &coordToIndexMap, string &s) -> int {
+        auto cm = coordToIndexMap.find(s);
+        if (cm == coordToIndexMap.end()) return -1;
+        else return cm->second;
+    };
+
     // initialize the start of the iteration
     int currX = start.first, currY = start.second;
     int nextIdx = 0;
-
     int currIdx = 0;
+
     string coordKey = coordToString(currX, currY);
     coordToIndexMap[coordKey] = currIdx;
     indexToCoordMap[currIdx] = coordKey;
     dCost[currIdx] = 0;
     string endKey = coordToString(end.first, end.second);
 
-
     typedef pair<int, int> pairInt;
     priority_queue<pairInt, vector<pairInt>, greater<pairInt> > pq;
-
-    // Find the lowest index based on cost value. return first instance.
-    // TODO: convert this portion to priority queue searching
-    auto getNextIndex = [](vector<bool> &deadEnd, vector<int> &dCost) -> int {
-
-
-        priority_queue<pairInt, vector<pairInt>, greater<pairInt> > pq;
-        for (int i = 0; i < dCost.size(); ++i){
-            if (dCost[i] < INT_MAX && !deadEnd[i]){
-                pq.push(make_pair(dCost[i], i));
-                // push in dCost first, then the index. then min heap based on dCost value.
-            }
-        }
-
-        return pq.top().second;
-    };
-
-    auto printDijkstraMemory = [](vector<bool> &deadEnd, vector<int> &dCost){
-        for (int i = 0; i < deadEnd.size(); ++i){
-            bool b = deadEnd[i];
-            cout << i << ":";
-            if (b) cout << "T";
-            else cout << "F";
-            cout << ", ";
-        }
-        cout << endl;
-
-        for (int i = 0; i < dCost.size(); ++i){
-
-            string outstring = "I";
-            if (dCost[i]  != INT_MAX) outstring = to_string(dCost[i]);
-            cout << i << ":" << outstring << ", ";
-        }
-        cout << endl;
-        string w;
-        cin >> w;
-    };
-
-
 
     // Iterate through the costMapGrid
     while (coordKey != endKey){
@@ -135,20 +103,9 @@ shortRoute dijkstra::shortPath(
         }
 
         // get the next index (lowest value) and place it into currIdx
-//        currIdx = getNextIndex(deadEnd, dCost);
         pair<int,int> currNode = pq.top();
-//        cout << "first: " << currNode.first << "\nsecond: " << currNode.second << endl;
         pq.pop();
         currIdx = currNode.second;
-//        printDijkstraMemory(deadEnd, dCost);
-//        auto piPrint = [](priority_queue<pairInt, vector<pairInt>, greater<pairInt> > pqCopy){
-//            while (!pqCopy.empty()){
-//                pair<int,int> pdat = pqCopy.top();
-//                cout << "[PQ] idx: " << pdat.second << " || val: " << pdat.first << endl;
-//                pqCopy.pop();
-//            }
-//        };
-//        piPrint(pq);
 
         // set coordKey to the next index.
         coordKey = getCoord(indexToCoordMap, currIdx);
@@ -189,17 +146,4 @@ shortRoute dijkstra::shortPath(
     return sr;
 }
 
-int dijkstra::getIndex(unordered_map<string, int> &coordToIndexMap, string &s) {
-    auto cm = coordToIndexMap.find(s);
-    if (cm == coordToIndexMap.end()) return -1;
-    else return cm->second;
-}
 
-pair<int, int> dijkstra::stringToPair(string s) {
-
-    stringstream ss(s);
-    pair<int, int> r;
-    ss >> r.first;
-    ss >> r.second;
-    return r;
-}
