@@ -10,6 +10,7 @@
 #include <vector>
 #include "dijkstra.h"
 #include <bits/stdc++.h> // for INT_MAX
+#include <sstream>
 using namespace std;
 
 
@@ -23,145 +24,163 @@ void printShortRoute(shortRoute solution) {
 }
 
 
-shortRoute dijkstra::shortPath(vector<vector<int>> &costMapGrid, pair<int, int> &start, pair<int, int> &end) {
+shortRoute dijkstra::shortPath(
+        vector<vector<int>> &costMapGrid, pair<int, int> &start, pair<int, int> &end) {
 
     int maxRow = costMapGrid.size();
     int maxCol = costMapGrid[0].size();
-    int nodeAmount = maxRow*maxCol;
-
-    vector<dNode> weightRow(nodeAmount, dNode());
-    for (int i = 0; i < weightRow.size(); ++i){
-        weightRow[i].weight = INT_MAX;
-        weightRow[i].index = i;
-    }
-    vector<bool> completed(nodeAmount, false);
-    unordered_map<string, int> coorToIndex;
-    auto coorToString = [](int x, int y) -> string {
-        return to_string(x) + "," + to_string(y);
-    };
-
-    auto inBounds = [maxRow, maxCol](int x, int y) -> bool {
-        return x >= 0 && x < maxRow && y >=0 && y < maxCol;
-    };
-
-    vector<vector<int>> moveDir = {{0,1},{0,-1},{1,0},{-1,0}};
-
-    int maxIndex = 0;
-    int completedNodes = 0;
-
-
-    weightRow[0].weight = 0;
-    weightRow[0].fromNode = -1;
-    weightRow[0].coordinate = start;
-    completedNodes++;
-//
-//    typedef pair<int, dNode> dPair;
-//    priority_queue<dPair, vector<dPair>, greater<dPair>> dNodeLow;
-
-    typedef pair<int, int> pairInt;
-    priority_queue<pairInt, vector<pairInt>, greater<pairInt>> dNodeLow;
-
-    dNodeLow.push(make_pair(0, 0));
-
-    while(!dNodeLow.empty()){
-
-//        cout << "weightRow: ";
-        for (auto wr: weightRow){
-            string w_weight;
-            if (wr.weight != INT_MAX) w_weight = to_string(wr.weight);
-            else w_weight = "I";
-            cout << wr.index << "-" << w_weight << "-" << wr.fromNode << ",";
-        }
-        cout << "\n";
-
-        pair<int,int> pqTop = dNodeLow.top();
-        dNodeLow.pop();
-        int currentWeight = pqTop.first;
-        int currentIndex = pqTop.second;
-
-
-        if (completed[currentIndex]){
-            continue;
-        }
-        else {
-            completedNodes++;
-            completed[currentIndex] = true;
-        }
-
-//        cout << currentIndex << "\n";
-
-
-        for (auto dir: moveDir){
-            int oldX = weightRow[currentIndex].coordinate.first;
-            int oldY = weightRow[currentIndex].coordinate.second;
-            int newX = oldX + dir[0];
-            int newY = oldY + dir[1];
-            if (!inBounds(newX, newY)) continue;
-
-            // check if the node has been traveled to yet.
-            string idxKey = coorToString(newX, newY);
-            auto keyFound = coorToIndex.find(idxKey);
-            int nextIndex;
-            if (keyFound == coorToIndex.end()){
-                maxIndex++;
-                nextIndex = maxIndex;
-                coorToIndex.insert({idxKey, nextIndex});
-            }
-            else
-                nextIndex = keyFound->second;
-
-
-
-            int newWeight = weightRow[currentIndex].weight + costMapGrid[oldX][oldY];
-            if (newWeight < weightRow[nextIndex].weight){
-                weightRow[nextIndex].weight = newWeight;
-                weightRow[nextIndex].index = nextIndex;
-                weightRow[nextIndex].fromNode = currentIndex;
-                weightRow[nextIndex].coordinate = make_pair(newX, newY);
-
-//                cout << newWeight << "::" << nextIndex << "\n";
-                dNodeLow.push(make_pair(newWeight, nextIndex));
-            }
-        }
-    }
-
-
-//
-//    buildShortRoute
-    cout << "Route:\n";
-    vector<int> idxPath;
-
-
-    auto endIdxFind = coorToIndex.find(coorToString(end.first, end.second));
+    int numCells = maxRow*maxCol;
     int endIdx;
 
-    if (endIdxFind != coorToIndex.end()) endIdx = endIdxFind->second;
-    else return shortRoute();
-    endIdx--;
-//    cout << endIdx << "\n\n";
-    idxPath.emplace_back(endIdx);
+    vector<int> fromIndex(numCells, -1);
+    vector<bool> deadEnd(numCells, false);
+    vector<int> dCost(numCells, INT_MAX);
+    dCost[0] = 0; // initialize the starting point.
 
-    int nextIdx = endIdx;
-    int i = 16;
-    do{
-        i--;
-        int fromN = weightRow[nextIdx].fromNode;
-        idxPath.emplace_back(fromN);
+    vector<vector<int>> moveDir = {{0,1}, {1,0}, {0,-1}, {-1, 0}};
+    auto inBounds = [maxRow, maxCol](int x, int y){
+        return x >= 0 && y >= 0 && x < maxRow && y < maxCol;
+    };
 
-        nextIdx = fromN;
-    }while  (nextIdx  != 0 );
+    unordered_map<string, int> coordToIndexMap;
+    unordered_map<int, string> indexToCoordMap;
+    auto coordToString = [](int x, int y) -> string {
+        return to_string(x) + " " + to_string(y);
+    };
+
+    auto getCoord = [](unordered_map<int, string> &indexToCoordMap, int idx) -> string {
+        auto im = indexToCoordMap.find(idx);
+        if (im == indexToCoordMap.end()) return "";
+        else return im->second;
+    };
+
+    // initialize the start of the iteration
+    int currX = start.first, currY = start.second;
+    int nextIdx = 0;
+
+    int currIdx = 0;
+    string coordKey = coordToString(currX, currY);
+    coordToIndexMap[coordKey] = currIdx;
+    indexToCoordMap[currIdx] = coordKey;
+    dCost[currIdx] = 0;
+    string endKey = coordToString(end.first, end.second);
+
+
+    typedef pair<int, int> pairInt;
+
+        // Find the lowest index based on cost value. return first instance.
+    // TODO: convert this portion to priority queue searching
+    auto getNextIndex = [](vector<bool> &deadEnd, vector<int> &dCost) -> int {
+
+//        for (int i = 0; i < deadEnd.size(); ++i){
+//            bool b = deadEnd[i];
+//            cout << i << ":";
+//            if (b) cout << "T";
+//            else cout << "F";
+//            cout << ", ";
+//        }
+//        cout << endl;
+//
+//        for (int i = 0; i < dCost.size(); ++i){
+//
+//            string outstring = "I";
+//            if (dCost[i]  != INT_MAX) outstring = to_string(dCost[i]);
+//            cout << i << ":" << outstring << ", ";
+//        }
+//        cout << endl;
+
+        priority_queue<pairInt, vector<pairInt>, greater<pairInt> > pq;
+        for (int i = 0; i < dCost.size(); ++i){
+            if (dCost[i] < INT_MAX && !deadEnd[i]){
+                pq.push(make_pair(dCost[i], i));
+                // push in dCost first, then the index. then min heap based on dCost value.
+            }
+        }
+//        string wait; cin >> wait;
+
+        return pq.top().second;
+    };
+
+
+
+    // Iterate through the costMapGrid
+    while (coordKey != endKey){
+
+        deadEnd[currIdx] = true;
+        int currCost = dCost[currIdx] + costMapGrid[currX][currY];
+
+        for (auto m: moveDir){
+            int newX = currX+m[0], newY = currY+m[1];
+            if (inBounds(newX, newY)){
+                string newCoordKey = coordToString(newX, newY);
+                int newIdx = getIndex(coordToIndexMap, newCoordKey);
+                if (newIdx < 0) {
+                    nextIdx++;
+                    newIdx = nextIdx;
+                    coordToIndexMap[newCoordKey] = newIdx;
+                    indexToCoordMap[newIdx] = newCoordKey;
+                }
+
+                if (currCost < dCost[newIdx]){
+                    dCost[newIdx] = currCost;
+                    fromIndex[newIdx] = currIdx;
+                }
+            }
+        }
+
+        // get the next index (lowest value) and place it into currIdx
+        currIdx = getNextIndex(deadEnd, dCost);
+
+        // set coordKey to the next index.
+        coordKey = getCoord(indexToCoordMap, currIdx);
+
+        pair<int,int> nextCoordXY = stringToPair(coordKey);
+        currX = nextCoordXY.first;
+        currY = nextCoordXY.second;
+
+        if (coordKey == endKey){
+            endIdx = currIdx;
+            deadEnd[endIdx] = true;
+        }
+    }
+
+
+    // Build the final solution and return
+    auto coordToPair = [](string inString) -> pair<int,int> {
+        stringstream strStream(inString);
+        int num1, num2;
+        strStream >> num1;
+        strStream >> num2;
+        return make_pair(num1, num2);
+    };
+
+    vector<pair<int,int>> route;
+    int idxFollow = endIdx;
+
+    while(idxFollow != -1){
+        pair<int, int> pCoord = coordToPair(getCoord(indexToCoordMap, idxFollow));
+        route.emplace_back(pCoord);
+        idxFollow = fromIndex[idxFollow];
+    }
+    reverse(route.begin(), route.end());
 
     shortRoute sr;
-    sr.routeCost = weightRow[endIdx].weight;
-    for (int x = idxPath.size()-1; x >= 0; --x){
-        sr.routeGuidance.emplace_back(weightRow[x].coordinate);
-    }
-
-
-    for (auto s: weightRow){
-        cout << s.index << ":: (" << s.coordinate.first << " , " << s.coordinate.second << ");\n";
-    }
-
-
+    sr.routeCost = dCost[endIdx];
+    sr.routeGuidance = route;
     return sr;
+}
+
+int dijkstra::getIndex(unordered_map<string, int> &coordToIndexMap, string &s) {
+    auto cm = coordToIndexMap.find(s);
+    if (cm == coordToIndexMap.end()) return -1;
+    else return cm->second;
+}
+
+pair<int, int> dijkstra::stringToPair(string s) {
+
+    stringstream ss(s);
+    pair<int, int> r;
+    ss >> r.first;
+    ss >> r.second;
+    return r;
 }

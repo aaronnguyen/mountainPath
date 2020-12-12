@@ -12,29 +12,41 @@ int main() {
 
     string mode;
 //    mode = "cin";
-    mode = "hardcode";
-//    mode = "random";
+//    mode = "hardcode";
+    mode = "assorted";
 
     costGrid dataGrid;
 
     if (mode == "cin"){
         generate_grid gg(true);
         dataGrid = gg.getGridData().specific;
+
+        dijkstra searchAlgo;
+        shortRoute sr = searchAlgo.shortPath(dataGrid.grid, dataGrid.start, dataGrid.end);
+        printShortRoute(sr);
     }
-    else if (mode == "random"){
+
+    else if (mode == "assorted"){
         generate_grid gg(false);
         gridData gd = gg.getGridData();
 
         unordered_map<int, costGrid> gd_assorted = gd.assorted;
 
-        int amtKey = 50;
-        auto gridSearch = gd_assorted.find(amtKey);
-        if(gridSearch == gd_assorted.end()) {
-            cout << "No Grid found at key: " << amtKey << "\n";
-            return -1;
+        dijkstra searchAlgo;
+
+        for (int amtKey: {10, 20, 50, 200, 500, 1000}){
+            auto gridSearch = gd_assorted.find(amtKey);
+            if(gridSearch == gd_assorted.end()) {
+                cout << "No Grid found at key: " << amtKey << "\n";
+                return -1;
+            }
+            dataGrid = gridSearch->second;
+            shortRoute sr = searchAlgo.shortPath(
+                    dataGrid.grid, dataGrid.start, dataGrid.end);
+            printShortRoute(sr);
         }
-        dataGrid = gridSearch->second;
     }
+
     else if (mode == "hardcode"){
 
         unordered_map<char, int> cellKeyVals;
@@ -53,21 +65,28 @@ int main() {
 
         dataGrid.start = make_pair(0, 0);
         dataGrid.end = make_pair(3, 3);
-
         dataGrid.grid = convertTerrainToCostGrid(terrainMapGrid, cellKeyVals);
+        dataGrid.rowCount = terrainMapGrid.size();
+        dataGrid.colCount = terrainMapGrid[0].size();
 
-    }
-    else return -1;
-
-    display_data(dataGrid);
-    cout << "\n\n";
+        display_data(dataGrid);
+        cout << "\n";
 
 //    bellmanFord searchAlgo;
-    dijkstra searchAlgo;
+        dijkstra searchAlgo;
 
-    shortRoute sr = searchAlgo.shortPath(dataGrid.grid, dataGrid.start, dataGrid.end);
+        shortRoute sr = searchAlgo.shortPath(dataGrid.grid, dataGrid.start, dataGrid.end);
+        printShortRoute(sr);
 
-    printShortRoute(sr);
+
+    }
+    else {
+        string errorString = "Mode does not exist: " + mode;
+        throw invalid_argument(errorString);
+        return -1;
+    }
+
+
 
     return 0;
 }

@@ -33,6 +33,13 @@ private:
     vector<vector<dNode>> weightTable;
     vector<dNode> completedRoute;
 
+
+
+    int getIndex(unordered_map<string, int> &coordToIndexMap, string &s);
+
+    pair<int,int> stringToPair(string s);
+
+
 public:
 //    shortRoute shortPath(vector<vector<int>> &costMapGrid,
 //                         pair<int,int> &start, pair<int,int> &end);
