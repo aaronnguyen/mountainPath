@@ -2,10 +2,9 @@
 #include <unordered_map>
 #include <vector>
 #include <chrono>
-#include <algorithm>
 
 #include "generate_grid.h"
-//#include "bellmanFord.h"
+#include "bellmanFord.h"
 #include "dijkstra.h"
 //#include "primm.h"
 //#include "kruskal.h"
@@ -13,6 +12,20 @@
 
 
 using namespace std;
+
+struct shortRoute{
+    vector<pair<int,int>> routeGuidance;
+    int routeCost{};
+};
+
+void printShortRoute(const shortRoute& solution) {
+
+    cout << solution.routeCost << "\n";
+
+    for (auto s: solution.routeGuidance){
+        cout << s.first << " " << s.second << "\n";
+    }
+}
 
 int main() {
 
@@ -22,19 +35,26 @@ int main() {
 //    mode = "assorted";
     string algorithm;
     algorithm = "dijkstra";
+//    algorithm = "bellmanford";
     costGrid dataGrid;
 
-    auto runAlgorithm = [](costGrid dataGrid, string algorithm) -> shortRoute {
+    auto runAlgorithm = [](costGrid dataGrid, const string& algorithm) -> shortRoute {
 
-
+        shortRoute sr;
         if (algorithm == "dijkstra"){
-            return dijkstraShortPath(dataGrid.grid, dataGrid.start, dataGrid.end);
+            dijkstra dj;
+            dj.calculatePath(dataGrid.grid, dataGrid.start, dataGrid.end);
+            sr.routeGuidance = dj.getRoute();
+            sr.routeCost = dj.getCost();
         }
         else if (algorithm == "bellmanford"){
-
+            bellmanFord bf;
+            bf.shortPath(dataGrid.grid, dataGrid.start, dataGrid.end);
+            sr.routeGuidance = bf.getRoute();
+            sr.routeCost = bf.getCost();
         }
 
-        return shortRoute();
+        return sr;
     };
 
 
@@ -62,7 +82,6 @@ int main() {
         generate_grid gg(true);
         dataGrid = gg.getGridData().specific;
 
-//        shortRoute sr = dijkstraShortPath(dataGrid.grid, dataGrid.start, dataGrid.end);
         shortRoute sr = runAlgorithm(dataGrid, algorithm);
 
         printShortRoute(sr);
@@ -125,7 +144,6 @@ int main() {
         display_data(dataGrid);
         cout << "\n";
 
-//        shortRoute sr = dijkstraShortPath(dataGrid.grid, dataGrid.start, dataGrid.end);
         shortRoute sr = runAlgorithm(dataGrid, algorithm);
         printShortRoute(sr);
 

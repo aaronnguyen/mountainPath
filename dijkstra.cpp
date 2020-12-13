@@ -8,18 +8,7 @@
 
 using namespace std;
 
-void printShortRoute(shortRoute solution) {
-
-    cout << solution.routeCost << "\n";
-
-    for (auto s: solution.routeGuidance){
-        cout << s.first << " " << s.second << "\n";
-    }
-}
-
-
-shortRoute dijkstraShortPath(
-        vector<vector<int>> &costMapGrid, pair<int, int> &start, pair<int, int> &end) {
+void dijkstra::calculatePath(vector<vector<int>> &costMapGrid, pair<int, int> &start, pair<int, int> &end) {
 
     int maxRow = costMapGrid.size();
     int maxCol = costMapGrid[0].size();
@@ -140,10 +129,8 @@ shortRoute dijkstraShortPath(
     }
     reverse(route.begin(), route.end());
 
-    shortRoute sr;
-    sr.routeCost = dCost[endIdx];
-    sr.routeGuidance = route;
-    return sr;
+    routeCost = dCost[endIdx];
+    routeGuidance = route;
 }
 
 
