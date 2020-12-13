@@ -2,12 +2,12 @@
 // Created by aaronnguyen on 12/3/20.
 //
 
-// NOTE TO SELF: cost is leaving the node, not the cost of entering the node.
+// TODO: cost is leaving the node, not the cost of entering the node. need to fix logic
 
 #include "bellmanFord.h"
 #include <bits/stdc++.h> // for INT_MAX
 
-shortRoute bellmanFord::shortPath(vector<vector<int>> &costMapGrid,
+bool bellmanFord::shortPath(vector<vector<int>> &costMapGrid,
                                   pair<int, int> &start, pair<int, int> &end){
 
     // define the boundaries.
@@ -23,17 +23,16 @@ shortRoute bellmanFord::shortPath(vector<vector<int>> &costMapGrid,
 
     // Bellman Ford Path Search
     int vertexCount = edgeData.nodeRef.size();
-//    int edgeCount = edgeData.edges.size();
     // private: vector<EDGE> edge;
 
     int parent[vertexCount];
     vector<int> value(vertexCount, INT_MAX);
 
     bool success = calculatePaths(vertexCount, parent, value);
-    if (!success) return shortRoute();
+    if (!success) return false;
 
-    return drawRoute(parent, value);
-
+    drawRoute(parent, value);
+    return true;
 }
 
 
@@ -185,7 +184,7 @@ bool bellmanFord::calculatePaths(int vertexCount, int *parent, vector<int> &valu
     return true;
 }
 
-shortRoute bellmanFord::drawRoute(int *parent, vector<int> &value) {
+void bellmanFord::drawRoute(int *parent, vector<int> &value) {
     // we built a reference, but now format it so we can use it.
     COOR coordByIndex[edgeData.nodeRef.size()];
     for (auto n: edgeData.nodeRef){
@@ -203,8 +202,6 @@ shortRoute bellmanFord::drawRoute(int *parent, vector<int> &value) {
 
     reverse(routeGuide.begin(), routeGuide.end());
 
-    shortRoute sr;
-    sr.routeCost = value[edgeData.endIndex];
-    sr.routeGuidance = routeGuide;
-    return sr;
+    routeCost = value[edgeData.endIndex];
+    routeGuidance = routeGuide;
 }

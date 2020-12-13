@@ -14,14 +14,19 @@
 
 using namespace std;
 
-struct shortRoute{
+class dijkstra{
+private:
     vector<pair<int,int>> routeGuidance;
     int routeCost;
+public:
+    void calculatePath(vector<vector<int>> &costMapGrid,
+                       pair<int, int> &start, pair<int, int> &end);
+
+    vector<pair<int,int>> getRoute(){ return routeGuidance; }
+
+    int getCost() const{ return routeCost; }
 };
 
-void printShortRoute(shortRoute solution);
 
-shortRoute dijkstraShortPath(vector<vector<int>> &costMapGrid,
-                             pair<int, int> &start, pair<int, int> &end);
 
 #endif //MOUNTAINPATH_DIJKSTRA_H

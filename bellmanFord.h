@@ -10,10 +10,6 @@
 #include <string>
 using namespace std;
 
-struct shortRoute{
-    vector<pair<int,int>> routeGuidance;
-    int routeCost;
-};
 struct EDGE{
     int srcIdx;
     int destIdx;
@@ -35,20 +31,24 @@ struct edgeNodeData{
 class bellmanFord{
 
 private:
-
+    vector<pair<int,int>> routeGuidance;
+    int routeCost;
     edgeNodeData edgeData;
 
     void generateEdgeList(vector<vector<int>> &costMapGrid,
                           pair<int, int> &start, pair<int, int> &end,
                           vector<int> border);
     bool calculatePaths(int vertextCount, int *parent, vector<int> &value);
-    shortRoute drawRoute(int *parent, vector<int> &value);
+    void drawRoute(int *parent, vector<int> &value);
 
 public:
 
-    shortRoute shortPath(vector<vector<int>> &costMapGrid,
+    bool shortPath(vector<vector<int>> &costMapGrid,
                          pair<int, int> &start, pair<int, int> &end);
 
+    vector<pair<int,int>> getRoute(){ return routeGuidance; }
+
+    int getCost() const{ return routeCost; }
 };
 
 #endif //MOUNTAINPATH_BELLMANFORD_H
