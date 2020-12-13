@@ -5,7 +5,7 @@
 #include <algorithm>
 
 #include "generate_grid.h"
-//#include "bellmanFord.h"
+#include "bellmanFord.h"
 #include "dijkstra.h"
 //#include "primm.h"
 //#include "kruskal.h"
@@ -14,6 +14,15 @@
 
 using namespace std;
 
+void printShortRoute(const shortRoute& solution) {
+
+    cout << solution.routeCost << "\n";
+
+    for (auto s: solution.routeGuidance){
+        cout << s.first << " " << s.second << "\n";
+    }
+}
+
 int main() {
 
     string mode;
@@ -21,7 +30,8 @@ int main() {
     mode = "hardcode";
 //    mode = "assorted";
     string algorithm;
-    algorithm = "dijkstra";
+//    algorithm = "dijkstra";
+    algorithm = "bellmanford";
     costGrid dataGrid;
 
     auto runAlgorithm = [](costGrid dataGrid, string algorithm) -> shortRoute {
@@ -31,7 +41,8 @@ int main() {
             return dijkstraShortPath(dataGrid.grid, dataGrid.start, dataGrid.end);
         }
         else if (algorithm == "bellmanford"){
-
+            bellmanFord bf;
+            return bf.shortPath(dataGrid.grid, dataGrid.start, dataGrid.end);
         }
 
         return shortRoute();
