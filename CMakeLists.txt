@@ -3,11 +3,12 @@ project(mountainPath)
 
 set(CMAKE_CXX_STANDARD 20)
 
+set(SOURCE_FILES main.cpp)
+add_executable(PathFinding_run ${SOURCE_FILES})
 
-#add_executable(mountainPath main.cpp generate_grid.cpp generate_grid.h shortestPath.cpp shortestPath.h dijkstra.cpp dijkstra.h)
-add_executable(
-        mountainPath main.cpp
-        generate_grid.cpp generate_grid.h
-        dijkstra.cpp dijkstra.h
-        bellmanFord.cpp bellmanFord.h
-)
+include_directories(PathFinding_lib)
+add_subdirectory(PathFinding_lib)
+
+target_link_libraries(PathFinding_run PathFinding_lib)
+
+add_subdirectory(GTest)
