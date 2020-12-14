@@ -7,26 +7,9 @@
 #include <iostream>
 #include <random>
 
+generate_grid::generate_grid() {}
 
-generate_grid::generate_grid(int mode) {
-
-    if (mode == 0) {
-        // cin capture mode
-        input_capture();
-    }
-    else if (mode == 1) {
-        // multiple grids at once
-        vector<int> assortedAmts = {10, 20, 50, 200, 500, 1000};
-        for(int a: assortedAmts){
-            costGrid cg = generateRandomGrid(a);
-            gridDat.assorted.insert({a, cg});
-        }
-    }
-
-    // else not a valid mode, don't set anything up automatically.
-}
-
-void generate_grid::input_capture() {
+costGrid generate_grid::input_capture() {
 
     int keyAmount;
     cin >> keyAmount;
@@ -59,21 +42,13 @@ void generate_grid::input_capture() {
     cin >> endX >> endY;
 
     // format the data to be distributed.
-    costGrid cg;
-    cg.grid = convertTerrainToCostGrid(terrainMapGrid, cellKeyVals);
+    costGrid cg = convertTerrainToCostGrid(terrainMapGrid, cellKeyVals);
     cg.rowCount = rowAmt;
     cg.colCount = colAmt;
     cg.start = make_pair(startX, startY);
     cg.end = make_pair(endX, endY);
 
-    gridDat.specific = cg;
-
-}
-
-gridData generate_grid::getGridData() {
-
-    cout << gridDat.assorted.size()  << "\n";
-    return gridDat;
+    return cg;
 }
 
 costGrid generate_grid::generateRandomGrid(int amt) {
@@ -94,8 +69,9 @@ costGrid generate_grid::generateRandomGrid(int amt) {
     }
 
     costGrid tempCG;
-    tempCG.rowCount = amt;
-    tempCG.colCount = amt;
+    tempCG.rowCount = r.size();
+    if (tempCG.rowCount == 0) tempCG.colCount = 0;
+    else tempCG.colCount = r[0].size();
     tempCG.grid = r;
 
 
@@ -107,22 +83,30 @@ costGrid generate_grid::generateRandomGrid(int amt) {
     return tempCG;
 }
 
-vector<vector<int>>
-convertTerrainToCostGrid(vector<vector<char>> &terrainMapGrid,
-                         unordered_map<char, int> &cellKeyVals) {
+costGrid convertTerrainToCostGrid(
+        vector<vector<char>> &terrainMapGrid,
+        unordered_map<char, int> &cellKeyVals) {
 
     int rLen = terrainMapGrid.size();
-    vector<vector<int>> costGrid(rLen, vector<int>());
+    vector<vector<int>> grid(rLen, vector<int>());
 
     for(int i = 0; i < rLen; i++){
         vector<char> terrainRow = terrainMapGrid[i];
         for(char cell: terrainRow){
             auto search = cellKeyVals.find(cell);
-            costGrid[i].emplace_back(search->second);
+            grid[i].emplace_back(search->second);
         }
     }
 
-    return costGrid;
+    costGrid cg;
+    cg.grid = grid;
+    cg.rowCount = grid.size();
+
+    if (cg.rowCount == 0) cg.colCount = 0;
+    else cg.colCount = grid[0].size();
+    // assuming it is a rectangular grid.
+
+    return cg;
 }
 
 void display_data(

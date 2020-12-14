@@ -27,7 +27,7 @@ int main(int argc, char** argv)  {
         costGrid dataGrid = gg.generateRandomGrid(amtKey);
 
         shortestPath sp;
-        sp.djikstra(dataGrid.grid, dataGrid.start, dataGrid.end);
+        sp.dijkstra(dataGrid.grid, dataGrid.start, dataGrid.end);
 
         vector<pair<int,int>> routeGuidance = sp.getRoute();
         int routeCost = sp.getCost();

@@ -17,10 +17,15 @@ using namespace std;
 class shortestPath{
 private:
     vector<pair<int,int>> routeGuidance;
-    int routeCost;
+    int routeCost = -1;
+
+    string coordToString(int x, int y);
+
+    string getCoord(unordered_map<int, string> &indexToCoordMap, int idx);
+
 public:
-    void djikstra(vector<vector<int>> &costMapGrid,
-                  pair<int, int> &start, pair<int, int> &end);
+    pair<int, string> dijkstra(vector<vector<int>> &costMapGrid,
+                               pair<int, int> &start, pair<int, int> &end);
 
     vector<pair<int,int>> getRoute(){ return routeGuidance; }
 

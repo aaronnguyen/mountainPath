@@ -6,7 +6,14 @@
 
 using namespace std;
 
-void shortestPath::djikstra(vector<vector<int>> &costMapGrid, pair<int, int> &start, pair<int, int> &end) {
+pair<int, string> shortestPath::dijkstra(vector<vector<int>> &costMapGrid, pair<int, int> &start, pair<int, int> &end) {
+
+    // need to make sure costMapGrid is square
+    set<int> rowLengths;
+    for (auto row: costMapGrid){
+        rowLengths.insert(row.size());
+    }
+    if (rowLengths.size() > 1) return make_pair(-2, "costMapGrid not rectangle.");
 
     int maxRow = costMapGrid.size();
     int maxCol = costMapGrid[0].size();
@@ -23,17 +30,12 @@ void shortestPath::djikstra(vector<vector<int>> &costMapGrid, pair<int, int> &st
         return x >= 0 && y >= 0 && x < maxRow && y < maxCol;
     };
 
+    // check if start and end are in bounds.
+    if (!inBounds(start.first, start.second)) return make_pair(-4, "Start Out of Bounds.");
+    if (!inBounds(end.first, end.second)) return make_pair(-4, "End Out of Bounds.");
+
     unordered_map<string, int> coordToIndexMap;
     unordered_map<int, string> indexToCoordMap;
-    auto coordToString = [](int x, int y) -> string {
-        return to_string(x) + " " + to_string(y);
-    };
-
-    auto getCoord = [](unordered_map<int, string> &indexToCoordMap, int idx) -> string {
-        auto im = indexToCoordMap.find(idx);
-        if (im == indexToCoordMap.end()) return "";
-        else return im->second;
-    };
 
     auto stringToPair = [](string s) -> pair<int,int> {
         stringstream ss(s);
@@ -67,13 +69,17 @@ void shortestPath::djikstra(vector<vector<int>> &costMapGrid, pair<int, int> &st
     while (coordKey != endKey){
 
         deadEnd[currIdx] = true;
-        int newCost = dCost[currIdx] + costMapGrid[currX][currY];
+        int gridCost = costMapGrid[currX][currY];
+        if (gridCost < 0) return make_pair(-3, "Negative Weight found.");
+        int newCost = dCost[currIdx] + gridCost;
 
         for (auto m: moveDir){
             int newX = currX+m[0], newY = currY+m[1];
             if (inBounds(newX, newY)){
                 string newCoordKey = coordToString(newX, newY);
                 int newIdx = getIndex(coordToIndexMap, newCoordKey);
+
+                // if index not found, then create a new reference for it.
                 if (newIdx < 0) {
                     nextIdx++;
                     newIdx = nextIdx;
@@ -129,6 +135,18 @@ void shortestPath::djikstra(vector<vector<int>> &costMapGrid, pair<int, int> &st
 
     routeCost = dCost[endIdx];
     routeGuidance = route;
+
+    return make_pair(0, "Success");
+}
+
+string shortestPath::coordToString(int x, int y) {
+    return to_string(x) + " " + to_string(y);
+}
+
+string shortestPath::getCoord(unordered_map<int, string> &indexToCoordMap, int idx) {
+    auto im = indexToCoordMap.find(idx);
+    if (im == indexToCoordMap.end()) return "";
+    else return im->second;
 }
 
 
