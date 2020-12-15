@@ -23,7 +23,7 @@ int main(int argc, char** argv)  {
 
     auto runAlgorithm = [](int amtKey) -> void {
 
-        generate_grid gg(-1);
+        generate_grid gg;
         costGrid dataGrid = gg.generateRandomGrid(amtKey);
 
         shortestPath sp;
@@ -37,9 +37,8 @@ int main(int argc, char** argv)  {
 
 //    vector<int> amtKeys = {10, 20, 50, 200, 500, 1000};
     int amtKey;
-//    stringstream argstream(argv[1]);
-//    argstream >> amtKey;
-    amtKey = 10;
+    stringstream argstream(argv[1]);
+    argstream >> amtKey;
 
     auto start = std::chrono::high_resolution_clock::now();
 

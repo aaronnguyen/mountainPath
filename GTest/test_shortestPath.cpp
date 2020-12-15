@@ -47,8 +47,6 @@ TEST(ShortestPathTestSuite, NegativeWeightTest){
 }
 
 
-
-
 TEST(ShortestPathTestSuite, startOutOfBoundsTest){
 
     // Any negative values in grid will cause unnecessary loop (inf?)
