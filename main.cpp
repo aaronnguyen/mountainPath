@@ -24,7 +24,11 @@ int main(int argc, char** argv)  {
     auto runAlgorithm = [](int amtKey) -> void {
 
         generate_grid gg;
-        costGrid dataGrid = gg.generateRandomGrid(amtKey);
+        costGrid dataGrid;
+        if (amtKey == -1)
+            dataGrid = gg.input_capture();
+        else
+            dataGrid = gg.generateRandomGrid(amtKey);
 
         shortestPath sp;
         sp.dijkstra(dataGrid.grid, dataGrid.start, dataGrid.end);
