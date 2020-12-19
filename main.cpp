@@ -4,7 +4,7 @@
 #include <chrono>
 
 #include "generate_grid.h"
-#include "shortestPath.h"
+#include "dijkstra.h"
 
 using namespace std;
 
@@ -30,8 +30,8 @@ int main(int argc, char** argv)  {
         else
             dataGrid = gg.generateRandomGrid(amtKey);
 
-        shortestPath sp;
-        sp.dijkstra(dataGrid.grid, dataGrid.start, dataGrid.end);
+        dijkstra sp;
+        sp.calculatePath(dataGrid.grid, dataGrid.start, dataGrid.end);
 
         vector<pair<int,int>> routeGuidance = sp.getRoute();
         int routeCost = sp.getCost();

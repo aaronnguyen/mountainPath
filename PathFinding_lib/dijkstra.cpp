@@ -2,11 +2,11 @@
 // Created by aaronnguyen on 12/8/20.
 //
 
-#include "shortestPath.h"
+#include "dijkstra.h"
 
 using namespace std;
 
-pair<int, string> shortestPath::dijkstra(vector<vector<int>> &costMapGrid, pair<int, int> &start, pair<int, int> &end) {
+pair<int, string> dijkstra::calculatePath(vector<vector<int>> &costMapGrid, pair<int, int> &start, pair<int, int> &end) {
 
     // need to make sure costMapGrid is square
     set<int> rowLengths;
@@ -139,11 +139,11 @@ pair<int, string> shortestPath::dijkstra(vector<vector<int>> &costMapGrid, pair<
     return make_pair(0, "Success");
 }
 
-string shortestPath::coordToString(int x, int y) {
+string dijkstra::coordToString(int x, int y) {
     return to_string(x) + " " + to_string(y);
 }
 
-string shortestPath::getCoord(unordered_map<int, string> &indexToCoordMap, int idx) {
+string dijkstra::getCoord(unordered_map<int, string> &indexToCoordMap, int idx) {
     auto im = indexToCoordMap.find(idx);
     if (im == indexToCoordMap.end()) return "";
     else return im->second;

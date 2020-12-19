@@ -2,8 +2,8 @@
 // Created by aaronnguyen on 12/8/20.
 //
 
-#ifndef MOUNTAINPATH_SHORTESTPATH_H
-#define MOUNTAINPATH_SHORTESTPATH_H
+#ifndef MOUNTAINPATH_DIJKSTRA_H
+#define MOUNTAINPATH_DIJKSTRA_H
 
 #include <vector>
 #include <unordered_map>
@@ -14,7 +14,7 @@
 
 using namespace std;
 
-class shortestPath{
+class dijkstra{
 private:
     vector<pair<int,int>> routeGuidance;
     int routeCost = -1;
@@ -24,7 +24,7 @@ private:
     string getCoord(unordered_map<int, string> &indexToCoordMap, int idx);
 
 public:
-    pair<int, string> dijkstra(vector<vector<int>> &costMapGrid,
+    pair<int, string> calculatePath(vector<vector<int>> &costMapGrid,
                                pair<int, int> &start, pair<int, int> &end);
 
     vector<pair<int,int>> getRoute(){ return routeGuidance; }
@@ -34,4 +34,4 @@ public:
 
 
 
-#endif //MOUNTAINPATH_SHORTESTPATH_H
+#endif //MOUNTAINPATH_DIJKSTRA_H
