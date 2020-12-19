@@ -1,0 +1,118 @@
+# Final Project: Shortest Path
+
+## Questions: 
+
+### Question 1
+How did you represent the grid as a graph? Which graph representation did you use
+and how did you determine the relationship between vertices? Include the edges and
+weights.
+
+### Answer 1
+The grid given was defined by characters and each character was defined as an int weight.
+So I translated the char grid into an int grid and implemented the algorithm with an directed graph in mind. Since each vertex weight is defining the cost to leave that vertex , then each direction of the traversal would have different weights to it.
+
+There are 2 edges of different weights between each node. Each vertex would have potential neighbors in the 4 cardinal directions.  The value stored in the coordinate for that vertex would be the edge weight to it's neighbor vertices.
+
+Using Dijkstra's algorithm, each vertex will only have 1 optimal edge though. So the meaningful relationship stored within a specific vector is the neighbor from which traveled to reach said specific vector.
+
+
+### Question 2
+What is the complexity of your implementation of shortestPath? Explain this by
+describing the data structure you used and how you implemented path finding.
+
+### Answer 2
+Implemented the path finding using Dijkstra's algorithm.  My implementation first connects all the nodes within the graph that has the lowest weight until it hits the target vertex.
+
+The main data structure used to control the loop is a Priority Queue. A priority queue is used to store and sort a list of nodes to visit.  The data type in the priority queue is a pair<int,int> p where p.first is the cost from a neighbor vertex to the vertex defined by index p.second.
+Priority Queue is designed to store largest values on top, so I had to use the "greater" functor to tell it to store lowest values on top.  Also had to define a pair<int,int> type to get it working with the priority queue, which the queue will use the first element in the pair as the comparable value.
+
+There are a few vectors to store relevant data, where the int index of the vector corresponds to a specific vertex. All initialized to it's least optimal value. (cost set to INT_MAX, visited set to false, etc.).
+
+For the Dijkstra's implementation, I would first start with a node, check the 4 edges with the weight that is stored in the grid cell, check if it is within bounds, then check if the cost of the current path is less than what is stored in the cost vector.
+If it is not, then ignore.  But if it is less, then mark from which vertex that path originated from, the accumulated cost of that path, then add that edge into the priority queue. 
+Get the top of the priority queue, marked the index as visited (prevents any duplicate visits), then loop until the index corresponding to the "end" is on top of the priority queue.
+
+While I was calculating the edges, if an optimal path was found, the "from vertex" index was saved in a separate vector. So to get the full route, I had to work backwards using that vector.  So by looking at the index of the end node, I could find the optimal parent.  Then looking at that parent, find its optimal parent, and so on until I reached the start. Although the reference is moving backwards from end to start, the values stored denotes moving from start to end in a directed graph.
+
+For the complexity, it is based on the priority queue.  Since we are inserting values into the priority queue in a sorted fashion, the time complexity would be O(log N).  I also did implement an unordered_map reference to bind coordinates from the grid to a unique index. The worst case scenario is linear amount of elements O(N).
+
+So in total, complexity would be somewhere around O(N log N).
+
+
+### Question 3
+How well does your implementation scale? Explain what effect N, the size of the grid,
+had on the performance of shortest Path in terms of execution time and memory
+usage.
+
+### Answer 3
+According to the data below, the effect N had on the execution time had a squared growth. time=KN^2 where K is some constant. With the data below, a function close to those points could be drawn using that equation where ~34 > K > ~13.  For memory usage, there is also squared growth albeit not as quick as the execution time.
+By graphing the points, the graph looks something like a y=x^2 graph.
+
+
+## Data Average based on 10 runs per N.
+
+   N    Elapsed Time (ms)    Memory Usage (KB)
+----  -------------------  -------------------
+  10                 3426                 3480
+  20                13474                 3593
+  50                77291                 3851
+ 100               201468                 5070
+ 200               542248                 9312
+ 500              3041132                42852
+1000             12292150               162785
+
+
+
+## Google Test Results:
+
+```
+/home/aaronnguyen/CLionProjects/mountainPath/cmake-build-debug/GTest/Google_Tests_run
+Running main() from /home/aaronnguyen/CLionProjects/mountainPath/GTest/lib/googletest/src/gtest_main.cc
+[==========] Running 14 tests from 2 test suites.
+[----------] Global test environment set-up.
+[----------] 6 tests from GenerateGridTestSuite
+[ RUN      ] GenerateGridTestSuite.GridGenTest
+[       OK ] GenerateGridTestSuite.GridGenTest (0 ms)
+[ RUN      ] GenerateGridTestSuite.GridGenAlwaysPositiveTest
+[       OK ] GenerateGridTestSuite.GridGenAlwaysPositiveTest (1 ms)
+[ RUN      ] GenerateGridTestSuite.negativeNumberGenTest
+[       OK ] GenerateGridTestSuite.negativeNumberGenTest (0 ms)
+[ RUN      ] GenerateGridTestSuite.costGridStartEndGenTest
+[       OK ] GenerateGridTestSuite.costGridStartEndGenTest (0 ms)
+[ RUN      ] GenerateGridTestSuite.defaultLastCellEndTest
+[       OK ] GenerateGridTestSuite.defaultLastCellEndTest (0 ms)
+[ RUN      ] GenerateGridTestSuite.defaultFirstCellTest
+[       OK ] GenerateGridTestSuite.defaultFirstCellTest (0 ms)
+[----------] 6 tests from GenerateGridTestSuite (1 ms total)
+
+[----------] 8 tests from ShortestPathTestSuite
+[ RUN      ] ShortestPathTestSuite.GridNotRectangleTest
+[       OK ] ShortestPathTestSuite.GridNotRectangleTest (0 ms)
+[ RUN      ] ShortestPathTestSuite.GridRectangleTest
+[       OK ] ShortestPathTestSuite.GridRectangleTest (0 ms)
+[ RUN      ] ShortestPathTestSuite.NegativeWeightTest
+[       OK ] ShortestPathTestSuite.NegativeWeightTest (0 ms)
+[ RUN      ] ShortestPathTestSuite.startOutOfBoundsTest
+[       OK ] ShortestPathTestSuite.startOutOfBoundsTest (0 ms)
+[ RUN      ] ShortestPathTestSuite.endOutOfBoundsTest
+[       OK ] ShortestPathTestSuite.endOutOfBoundsTest (0 ms)
+[ RUN      ] ShortestPathTestSuite.nullStartEndDefaultsToZerosTest
+[       OK ] ShortestPathTestSuite.nullStartEndDefaultsToZerosTest (0 ms)
+[ RUN      ] ShortestPathTestSuite.costNoPathTest
+[       OK ] ShortestPathTestSuite.costNoPathTest (0 ms)
+[ RUN      ] ShortestPathTestSuite.routeNoPathTest
+[       OK ] ShortestPathTestSuite.routeNoPathTest (0 ms)
+[----------] 8 tests from ShortestPathTestSuite (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 14 tests from 2 test suites ran. (1 ms total)
+[  PASSED  ] 14 tests.
+
+Process finished with exit code 0
+```
+
+## Github Link
+[aaronnguyen/mountainPath](https://github.com/aaronnguyen/mountainPath/tree/assignmentSubmission)
+
+Note: Originally I thought we had to program each of the shortest path algorithms. So in the main branch, the file structure is different than what was requested for the assignment. So I created another branch and tailored the files to the project specifications.
+
