@@ -2,9 +2,12 @@
 #include <unordered_map>
 #include <vector>
 #include <chrono>
+#include <sstream>
 
 #include "generate_grid.h"
 #include "dijkstra.h"
+#include "bellmanFord.h"
+
 
 using namespace std;
 
@@ -30,7 +33,9 @@ int main(int argc, char** argv)  {
         else
             dataGrid = gg.generateRandomGrid(amtKey);
 
-        dijkstra sp;
+//        dijkstra sp;
+        bellmanFord sp;
+
         sp.calculatePath(dataGrid.grid, dataGrid.start, dataGrid.end);
 
         vector<pair<int,int>> routeGuidance = sp.getRoute();
@@ -41,8 +46,17 @@ int main(int argc, char** argv)  {
 
 //    vector<int> amtKeys = {10, 20, 50, 200, 500, 1000};
     int amtKey;
-    stringstream argstream(argv[1]);
-    argstream >> amtKey;
+
+    int argvCount = 0;
+    while(argv[++argvCount] != NULL);
+
+    if (argvCount > 1){
+        stringstream argstream(argv[1]);
+        argstream >> amtKey;
+    }
+    else
+        cout << "No args found, defaulting to 10.\n";
+        amtKey = 10;
 
     auto start = std::chrono::high_resolution_clock::now();
 
